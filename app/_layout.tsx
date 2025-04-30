@@ -17,6 +17,8 @@ import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { AuthProvider } from '@/context/AuthContext';
 import * as SplashScreenLib from 'expo-splash-screen';
 import { MenuProvider } from 'react-native-popup-menu';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // Prevent automatic splash screen hiding
 SplashScreenLib.preventAutoHideAsync();
@@ -49,17 +51,23 @@ export default function RootLayout() {
   }
 
   return (
-    <MenuProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
-        <>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" options={{ title: 'Oops!' }} />
-          </Stack>
-          <StatusBar style="auto" />
-        </>
+        <MenuProvider>
+          <BottomSheetModalProvider>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+              }}
+            >
+              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" options={{ title: 'Oops!' }} />
+            </Stack>
+            <StatusBar style="auto" />
+          </BottomSheetModalProvider>
+        </MenuProvider>
       </AuthProvider>
-    </MenuProvider>
+    </GestureHandlerRootView>
   );
 }

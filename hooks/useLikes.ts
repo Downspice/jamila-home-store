@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 
@@ -7,39 +7,46 @@ export const useLikes = () => {
   const [likedProducts, setLikedProducts] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
+  const fetchLikedProducts = async () => {
     if (!user) {
       setLikedProducts([]);
       setLoading(false);
       return;
     }
 
-    const fetchLikedProducts = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const { data, error } = await supabase
-          .from('user_likes')
-          .select('product_id')
-          .eq('user_id', user.id);
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const { data, error } = await supabase
+        .from('user_likes')
+        .select('product_id')
+        .eq('user_id', user.id);
 
-        if (error) {
-          throw error;
-        }
-
-        if (data) {
-          setLikedProducts(data.map(like => like.product_id));
-        }
-      } catch (error: any) {
-        console.error('Error fetching liked products:', error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
+      if (error) {
+        throw error;
       }
-    };
 
+      if (data) {
+        setLikedProducts(data.map(like => like.product_id));
+      }
+    } catch (error: any) {
+      console.error('Error fetching liked products:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLikedProducts();
+  }, [user]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
     fetchLikedProducts();
   }, [user]);
 
@@ -85,5 +92,5 @@ export const useLikes = () => {
     return likedProducts.includes(productId);
   };
 
-  return { likedProducts, loading, error, toggleLike, isLiked };
+  return { likedProducts, loading, error, toggleLike, isLiked, refreshing, onRefresh };
 };

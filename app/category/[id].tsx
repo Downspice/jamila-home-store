@@ -62,7 +62,7 @@ export default function CategoryDetailScreen() {
           ListHeaderComponent={
             category?.description ? (
               <Text style={styles.description}>
-                {category.description}
+                {/* {category.description} */}
               </Text>
             ) : null
           }
@@ -98,11 +98,6 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingBottom: SPACING.xxl,
-  },
-  productCard: {
-    flex: 1,
-    margin: SPACING.xs,
-    maxWidth: '50%',
   },
   emptyContainer: {
     alignItems: 'center',

@@ -37,6 +37,16 @@ CREATE POLICY "Users can update their own profile"
   FOR UPDATE
   USING (auth.uid() = id);
 
+CREATE POLICY "Users can insert their own profile"
+  ON profiles
+  FOR INSERT
+  WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Users can delete their own profile"
+  ON profiles
+  FOR DELETE
+  USING (auth.uid() = id);
+
 -- Create categories table
 CREATE TABLE IF NOT EXISTS categories (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

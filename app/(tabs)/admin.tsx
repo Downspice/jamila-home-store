@@ -14,11 +14,13 @@ import { COLORS, SPACING } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import Header from "@/components/shared/Header";
 import GlassmorphicCard from "@/components/ui/GlassmorphicCard";
-import Button from "@/components/ui/Button";
+import FloatingActionButton from "@/components/ui/FloatingActionButton";
 import { useProducts } from "@/hooks/useProducts";
 import { useCategories } from "@/hooks/useCategories";
 import { Edit, Plus, Trash2 } from "lucide-react-native";
 import { supabase } from "@/lib/supabase";
+import ProductSkeleton from "@/components/ui/ProductSkeleton";
+import CatalogSkeleton from "@/components/ui/CatalogSkeleton";
 
 export default function AdminScreen() {
   const router = useRouter();
@@ -138,7 +140,14 @@ export default function AdminScreen() {
               if (error) throw error;
 
               await refetchProducts();
-              Alert.alert("Success", "Product deleted successfully");
+              Alert.alert("Success", "Product deleted successfully", [
+                {
+                  text: "OK",
+                  onPress: () => {
+                    router.back();
+                  },
+                },
+              ]);
             } catch (error: any) {
               Alert.alert("Error", error.message);
             }
@@ -167,7 +176,14 @@ export default function AdminScreen() {
               if (error) throw error;
 
               await refetchCategories();
-              Alert.alert("Success", "Category deleted successfully");
+              Alert.alert("Success", "Category deleted successfully", [
+                {
+                  text: "OK",
+                  onPress: () => {
+                    router.back();
+                  },
+                },
+              ]);
             } catch (error: any) {
               Alert.alert("Error", error.message);
             }
@@ -180,12 +196,9 @@ export default function AdminScreen() {
   useFocusEffect(
     React.useCallback(() => {
       // Refetch data when screen comes into focus
-      if (selectedTab === "products") {
-        refetchProducts();
-      } else {
-        refetchCategories();
-      }
-    }, [selectedTab])
+      refetchProducts();
+      refetchCategories();
+    }, [])
   );
 
   return (
@@ -227,50 +240,46 @@ export default function AdminScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.addButtonContainer}>
-        <Button
-          title={selectedTab === "products" ? "Add Product" : "Add Category"}
-          onPress={
-            selectedTab === "products" ? handleAddProduct : handleAddCategory
-          }
-          icon={<Plus size={18} color={COLORS.white} />}
-          iconPosition="left"
-        />
-      </View>
-
       <View style={styles.content}>
         {selectedTab === "products" ? (
-          <FlatList
-            data={products}
-            renderItem={renderProductItem}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.list}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-              !productsLoading ? (
+          productsLoading ? (
+            <CatalogSkeleton count={3} />
+          ) : (
+            <FlatList
+              data={products}
+              renderItem={renderProductItem}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={[styles.list, { paddingBottom: SPACING.xxl }]}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
                 <View style={styles.emptyContainer}>
                   <Text style={styles.emptyText}>No products found</Text>
                 </View>
-              ) : null
-            }
-          />
+              }
+            />
+          )
+        ) : categoriesLoading ? (
+          <CatalogSkeleton count={3} />
         ) : (
           <FlatList
             data={categories}
             renderItem={renderCategoryItem}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.list}
+            contentContainerStyle={[styles.list, { paddingBottom: SPACING.xxl }]}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
-              !categoriesLoading ? (
-                <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>No categories found</Text>
-                </View>
-              ) : null
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No categories found</Text>
+              </View>
             }
           />
         )}
       </View>
+
+      <FloatingActionButton
+        onPress={selectedTab === "products" ? handleAddProduct : handleAddCategory}
+        icon={<Plus size={24} color={COLORS.white} />}
+      />
     </View>
   );
 }
@@ -304,10 +313,6 @@ const styles = StyleSheet.create({
   activeTabText: {
     color: COLORS.white,
   },
-  addButtonContainer: {
-    paddingHorizontal: SPACING.lg,
-    marginTop: SPACING.lg,
-  },
   content: {
     flex: 1,
     padding: SPACING.md,
@@ -315,14 +320,9 @@ const styles = StyleSheet.create({
   list: {
     display: "flex",
     flexDirection: "column",
-    // marginBottom: SPACING.betweenGlassCard,
-    // paddingBottom: 70,  // Space for tab bar
-    // backgroundColor: COLORS.black,
   },
   itemCard: {
-    // backgroundColor: COLORS.black,
     marginBottom: 10,
-    // padding: SPACING.md,
   },
   itemContent: {
     flexDirection: "row",

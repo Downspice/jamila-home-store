@@ -1,13 +1,14 @@
-import React from 'react';
-import { StyleSheet, View, Text, FlatList, Alert, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, FlatList, Alert, TouchableOpacity, Modal } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { COLORS, SPACING } from '@/constants/theme';
 import { useCatalogDetail } from '@/hooks/useCatalogs';
 import ProductCard from '@/components/ui/ProductCard';
 import Header from '@/components/shared/Header';
 import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Edit, Trash2 } from 'lucide-react-native';
+import { Edit, Trash2, X } from 'lucide-react-native';
 
 export default function CatalogDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -19,6 +20,9 @@ export default function CatalogDetailScreen() {
     removeProductFromCatalog,
     renameCatalog 
   } = useCatalogDetail(id as string);
+
+  const [isRenameModalVisible, setIsRenameModalVisible] = useState(false);
+  const [newCatalogName, setNewCatalogName] = useState('');
 
   const handleProductPress = (productId: string) => {
     router.push(`/product/${productId}`);
@@ -44,26 +48,31 @@ export default function CatalogDetailScreen() {
     );
   };
 
-  const handleRenameCatalog = () => {
+  const handleRenamePress = () => {
     if (!catalog) return;
+    setNewCatalogName(catalog.name);
+    setIsRenameModalVisible(true);
+  };
+
+  const handleDismissRenameModal = () => {
+    setIsRenameModalVisible(false);
+    setNewCatalogName('');
+  };
+
+  const handleRenameCatalog = async () => {
+    if (!catalog || !newCatalogName.trim()) return;
     
-    // This would show a modal or form for renaming in a real app
-    Alert.alert(
-      'Rename Catalog',
-      'Enter a new name for your catalog',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Rename',
-          onPress: async () => {
-            const result = await renameCatalog('My Updated Catalog');
-            if (result.error) {
-              Alert.alert('Error', 'Failed to rename catalog');
-            }
-          }
-        },
-      ]
-    );
+    try {
+      const result = await renameCatalog(newCatalogName.trim());
+      if (result.error) {
+        Alert.alert('Error', 'Failed to rename catalog');
+        return;
+      }
+      handleDismissRenameModal();
+    } catch (error) {
+      console.error('Error renaming catalog:', error);
+      Alert.alert('Error', 'Failed to rename catalog');
+    }
   };
 
   const renderItem = ({ item, index }: any) => (
@@ -79,9 +88,8 @@ export default function CatalogDetailScreen() {
         id={item.id}
         name={item.name}
         images={item.images}
-        likeCount={0} // Not relevant in catalog view
+        likeCount={item.like_count}
         onPress={() => handleProductPress(item.id)}
-        style={styles.productCard}
         index={index}
       />
     </View>
@@ -116,7 +124,7 @@ export default function CatalogDetailScreen() {
       >
         <Button
           title="Rename Catalog"
-          onPress={handleRenameCatalog}
+          onPress={handleRenamePress}
           variant="outline"
           icon={<Edit size={18} color={COLORS.primary} />}
           iconPosition="left"
@@ -155,6 +163,49 @@ export default function CatalogDetailScreen() {
           }
         />
       </Animated.View>
+
+      <Modal
+        visible={isRenameModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={handleDismissRenameModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Rename Catalog</Text>
+              <TouchableOpacity onPress={handleDismissRenameModal}>
+                <X size={24} color={COLORS.textPrimary} />
+              </TouchableOpacity>
+            </View>
+            
+            <Text style={styles.modalDescription}>
+              Enter a new name for your catalog
+            </Text>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Catalog Name</Text>
+              <Input
+                value={newCatalogName}
+                onChangeText={setNewCatalogName}
+                placeholder="Enter new name"
+              />
+            </View>
+
+            <View style={styles.modalButtons}>
+              <Button
+                title="Cancel"
+                variant="outline"
+                onPress={handleDismissRenameModal}
+              />
+              <Button
+                title="Rename"
+                onPress={handleRenameCatalog}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -182,9 +233,6 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: SPACING.xs,
     maxWidth: '50%',
-  },
-  productCard: {
-    width: '100%',
   },
   removeButton: {
     position: 'absolute',
@@ -232,5 +280,49 @@ const styles = StyleSheet.create({
   },
   backButton: {
     width: 150,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: COLORS.background,
+    borderRadius: 16,
+    padding: SPACING.lg,
+    width: '90%',
+    maxWidth: 400,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
+  modalTitle: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: 20,
+    color: COLORS.textPrimary,
+  },
+  modalDescription: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.xl,
+  },
+  inputGroup: {
+    marginBottom: SPACING.xl,
+  },
+  inputLabel: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: 14,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.xs,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: SPACING.md,
   },
 });

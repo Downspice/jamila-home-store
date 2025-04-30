@@ -68,8 +68,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Error fetching profile:', error);
       } else if (data) {
         console.log('Profile fetched successfully:', data);
+        console.log('is_admin value:', data.is_admin);
+        console.log('Setting profile and admin status...');
         setProfile(data);
         setIsAdmin(data.is_admin);
+        console.log('Admin status set to:', data.is_admin);
       } else {
         console.log('No profile found for user:', userId);
       }
@@ -82,13 +85,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('Attempting sign in...');
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
       
-      if (error) return { error };
+      if (error) {
+        console.error('Sign in error:', error);
+        return { error };
+      }
+
+      console.log('Sign in successful, user:', data.user?.id);
+      return { data, error: null };
     } catch (error) {
+      console.error('Sign in error:', error);
       return { error };
     }
   };

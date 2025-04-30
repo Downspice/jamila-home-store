@@ -1,27 +1,37 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { BlurView } from 'expo-blur';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, useColorScheme } from 'react-native';
 import { COLORS, SPACING } from '@/constants/theme';
 import { useAuth } from '@/context/AuthContext';
-import { Home, Grid, Heart, Bookmark, User } from 'lucide-react-native';
+import { Home, Grid, Heart, Bookmark, User, Search } from 'lucide-react-native';
 
 export default function TabLayout() {
+  const colorScheme = useColorScheme();
   const { isAdmin } = useAuth();
+  console.log("isAdmin", isAdmin);
 
-  return (
+  if(!isAdmin) {
+  return ( 
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: true,
         tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.inactive,
+        tabBarInactiveTintColor: COLORS.textSecondary,
         tabBarLabelStyle: {
           fontFamily: 'Poppins-Regular',
           fontSize: 10,
           marginBottom: 6,
         },
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: {
+          backgroundColor: colorScheme === 'dark' ? COLORS.background : COLORS.white,
+          borderTopColor: COLORS.textSecondary,
+        },
+        headerStyle: {
+          backgroundColor: colorScheme === 'dark' ? COLORS.background : COLORS.white,
+        },
+        headerTintColor: colorScheme === 'dark' ? COLORS.white : COLORS.black,
         tabBarBackground: () => (
           Platform.OS === 'ios' ? 
             <BlurView intensity={100} tint="light" style={StyleSheet.absoluteFill} /> :
@@ -35,6 +45,15 @@ export default function TabLayout() {
           title: 'Home',
           tabBarIcon: ({ color, size }) => (
             <Home size={size - 2} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: 'Search',
+          tabBarIcon: ({ color, size }) => (
+            <Search size={size - 2} color={color} />
           ),
         }}
       />
@@ -55,16 +74,109 @@ export default function TabLayout() {
             <Heart size={size - 2} color={color} />
           ),
         }}
-      />
+      /> 
+        <Tabs.Screen
+          name="admin"
+          options={{
+            href: null,
+          }}
+        />  <Tabs.Screen
+          name="catalogs"
+          options={{
+            title: 'Catalogs',
+            tabBarIcon: ({ color, size }) => (
+              <Bookmark size={size - 2} color={color} />
+            ),
+          }}
+        />
       <Tabs.Screen
-        name="catalogs"
+        name="profile"
         options={{
-          title: 'Catalogs',
+          title: 'Profile',
           tabBarIcon: ({ color, size }) => (
-            <Bookmark size={size - 2} color={color} />
+            <User size={size - 2} color={color} />
+          ),
+        }}
+      /> 
+    
+    </Tabs>
+  );}
+
+  if(isAdmin) {
+
+    return (
+      
+      <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: COLORS.primary,
+        tabBarInactiveTintColor: COLORS.textSecondary,
+        tabBarLabelStyle: {
+          fontFamily: 'Poppins-Regular',
+          fontSize: 10,
+          marginBottom: 6,
+        },
+        tabBarStyle: {
+          backgroundColor: colorScheme === 'dark' ? COLORS.background : COLORS.white,
+          borderTopColor: COLORS.textSecondary,
+        },
+        headerStyle: {
+          backgroundColor: colorScheme === 'dark' ? COLORS.background : COLORS.white,
+        },
+        headerTintColor: colorScheme === 'dark' ? COLORS.white : COLORS.black,
+        tabBarBackground: () => (
+          Platform.OS === 'ios' ? 
+            <BlurView intensity={100} tint="light" style={StyleSheet.absoluteFill} /> :
+            null
+        ),
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color, size }) => (
+            <Home size={size - 2} color={color} />
           ),
         }}
       />
+      <Tabs.Screen
+        name="search"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="categories"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="favorites"
+        options={{
+          href: null,
+        }}
+      /> 
+        <Tabs.Screen
+          name="admin"
+          options={{
+            title: 'Admin',
+            tabBarIcon: ({ color, size }) => (
+              <User size={size - 2} color={color} />
+            ),
+          }}
+        />  
+      <Tabs.Screen
+          name="catalogs"
+          options={{
+            title: 'Catalogs',
+            tabBarIcon: ({ color, size }) => (
+              <Bookmark size={size - 2} color={color} />
+            ),
+          }}
+        />
       <Tabs.Screen
         name="profile"
         options={{
@@ -74,19 +186,9 @@ export default function TabLayout() {
           ),
         }}
       />
-      {isAdmin && (
-        <Tabs.Screen
-          name="admin"
-          options={{
-            title: 'Admin',
-            tabBarIcon: ({ color, size }) => (
-              <User size={size - 2} color={color} />
-            ),
-          }}
-        />
-      )}
+    
     </Tabs>
-  );
+    );}
 }
 
 const styles = StyleSheet.create({

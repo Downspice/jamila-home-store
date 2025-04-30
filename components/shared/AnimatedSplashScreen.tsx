@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text,Image } from 'react-native';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -89,17 +89,13 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
   return (
     <Animated.View style={[styles.container, containerAnimatedStyle]}>
       <LinearGradient
-        colors={COLORS.gradientPrimary}
+        colors={['#000000', '#000000']}
         style={styles.gradient}
       >
         <View style={styles.content}>
-          <Animated.View style={[styles.logoContainer, logoAnimatedStyle]}>
-            <Text style={styles.logoText}>J</Text>
+          <Animated.View style={[ logoAnimatedStyle]}> 
+            <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
           </Animated.View>
-          
-          <Animated.Text style={[styles.title, textAnimatedStyle]}>
-            Jamila Home
-          </Animated.Text>
         </View>
       </LinearGradient>
     </Animated.View>
@@ -122,19 +118,9 @@ const styles = StyleSheet.create({
   content: {
     alignItems: 'center',
   },
-  logoContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: COLORS.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  logoText: {
-    fontFamily: 'Playfair-Bold',
-    fontSize: 48,
-    color: COLORS.primary,
+  logo: {
+    width: 300,
+    height: 300,
   },
   title: {
     fontFamily: 'Playfair-Bold',

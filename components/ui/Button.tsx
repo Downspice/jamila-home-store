@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   text: {
-    color: COLORS.white,
+    color: COLORS.black,
     fontFamily: 'Poppins-Medium',
     fontSize: 16,
     textAlign: 'center',

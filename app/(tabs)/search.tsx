@@ -16,6 +16,8 @@ import Header from '@/components/shared/Header';
 import GlassmorphicCard from '@/components/ui/GlassmorphicCard';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Search, X } from 'lucide-react-native';
+import ProductCard from '@/components/ui/ProductCard';
+import { useLikes } from '@/hooks/useLikes';
 
 export default function SearchScreen() {
   const router = useRouter();
@@ -34,6 +36,10 @@ export default function SearchScreen() {
 
   const clearSearch = () => {
     setQuery('');
+  };
+  const { toggleLike, isLiked } = useLikes();
+  const handleLikePress = async (id: string) => {
+    await toggleLike(id);
   };
 
   return (
@@ -55,6 +61,7 @@ export default function SearchScreen() {
               <X size={20} color={COLORS.textSecondary} />
             </TouchableOpacity>
           )}
+          
         </View>
       </View>
 
@@ -78,16 +85,23 @@ export default function SearchScreen() {
               <TouchableOpacity
                 onPress={() => handleProductPress(product.id)}
               >
-                <GlassmorphicCard style={styles.card}>
-                  <Image
-                    source={{ uri: product.images[0] || '' }}
-                    style={styles.image}
-                  />
-                  <Text style={styles.name}>{product.name}</Text>
-                </GlassmorphicCard>
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  name={product.name}
+                  images={product.images}
+                  likeCount={product.like_count}
+                  isLiked={isLiked(product.id)}
+                  onPress={() => handleProductPress(product.id)}
+                  onLike={() => handleLikePress(product.id)}
+                  index={index}
+                />
               </TouchableOpacity>
             </Animated.View>
           ))}
+          {results.length === 0 && (
+            <Text style={styles.noResults}>Oh sorry, we couldn't find what you were looking for.</Text>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -143,4 +157,12 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     marginTop: SPACING.sm,
   },
+  noResults: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontFamily: 'Poppins-Medium',
+    fontSize: 16,
+    color: COLORS.textPrimary,
+  }
 });

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 
 export type Product = {
@@ -16,6 +16,7 @@ export const useProducts = (categoryId?: string, searchQuery?: string) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -69,6 +70,7 @@ export const useProducts = (categoryId?: string, searchQuery?: string) => {
       setError(error.message);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -133,10 +135,17 @@ export const useProducts = (categoryId?: string, searchQuery?: string) => {
     fetchProducts();
   }, [categoryId, searchQuery]);
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchProducts();
+  }, []);
+
   return { 
     products, 
     loading, 
     error, 
+    refreshing,
+    onRefresh,
     refetch: fetchProducts,
     updateProduct,
     deleteProduct
@@ -254,4 +263,60 @@ export const useProductDetail = (id?: string) => {
   }, [id]);
 
   return { product, loading, error };
+};
+
+export const useProductsByCategory = (categoryId: string, limit = 5) => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select(`
+            *,
+            product_categories!inner (
+              category_id,
+              categories (id, name)
+            )
+          `)
+          .eq('product_categories.category_id', categoryId)
+          .limit(limit);
+
+        if (error) {
+          throw error;
+        }
+
+        if (data) {
+          const formattedProducts = data.map(item => {
+            const categories = item.product_categories.map((pc: any) => ({
+              id: pc.categories.id,
+              name: pc.categories.name
+            }));
+
+            return {
+              ...item,
+              categories
+            };
+          });
+
+          setProducts(formattedProducts);
+        }
+      } catch (error: any) {
+        console.error('Error fetching products by category:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [categoryId, limit]);
+
+  return { products, loading, error };
 };

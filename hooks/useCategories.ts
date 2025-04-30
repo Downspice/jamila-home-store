@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 
 export type Category = {
@@ -13,6 +13,7 @@ export const useCategories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -34,6 +35,7 @@ export const useCategories = () => {
       setError(error.message);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -82,10 +84,17 @@ export const useCategories = () => {
     fetchCategories();
   }, []);
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchCategories();
+  }, []);
+
   return { 
     categories, 
     loading, 
     error, 
+    refreshing,
+    onRefresh,
     refetch: fetchCategories,
     updateCategory,
     deleteCategory

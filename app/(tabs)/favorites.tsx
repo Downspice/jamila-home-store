@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, FlatList } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '@/constants/theme';
 import { useProducts } from '@/hooks/useProducts';
@@ -9,12 +9,13 @@ import Header from '@/components/shared/Header';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAuth } from '@/context/AuthContext';
 import Button from '@/components/ui/Button';
+import ProductSkeleton from '@/components/ui/ProductSkeleton';
 
 export default function FavoritesScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { products, loading } = useProducts();
-  const { likedProducts, toggleLike, isLiked } = useLikes();
+  const { likedProducts, toggleLike, isLiked, loading: likesLoading, error, refreshing, onRefresh } = useLikes();
   
   // Filter products to only show liked ones
   const likedProductsList = products.filter(product => 
@@ -28,20 +29,6 @@ export default function FavoritesScreen() {
   const handleLikePress = async (id: string) => {
     await toggleLike(id);
   };
-
-  const renderItem = ({ item, index }: any) => (
-    <ProductCard
-      id={item.id}
-      name={item.name}
-      images={item.images}
-      likeCount={item.like_count}
-      isLiked={true} // All products here are liked
-      onPress={() => handleProductPress(item.id)}
-      onLike={() => handleLikePress(item.id)}
-      style={styles.productCard}
-      index={index}
-    />
-  );
 
   if (!user) {
     return (
@@ -59,48 +46,54 @@ export default function FavoritesScreen() {
     );
   }
 
+  if (loading) {
+    return <ProductSkeleton />;
+  }
+
+  if (likedProductsList.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.message}>No favorites yet</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Header title="Favorites" showBackButton={false} />
+      <Header title="Favorites" />
       
-      <Animated.View 
-        entering={FadeInDown.delay(200).springify()}
+      <ScrollView
         style={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={COLORS.primary}
+          />
+        }
       >
-        <FlatList
-          data={likedProductsList}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={
-            likedProductsList.length > 0 ? (
-              <Text style={styles.description}>
-                Your favorite furniture items
-              </Text>
-            ) : null
-          }
-          ListEmptyComponent={
-            !loading ? (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>
-                  You haven't liked any products yet.
-                </Text>
-                <Text style={styles.emptySubText}>
-                  Browse our collection and heart items you love!
-                </Text>
-                <Button 
-                  title="Browse Products" 
-                  onPress={() => router.push('/')} 
-                  style={styles.browseButton}
-                  variant="primary"
-                />
-              </View>
-            ) : null
-          }
-        />
-      </Animated.View>
+        <View style={styles.grid}>
+          {likedProductsList.map((product, index) => (
+            <Animated.View
+              key={product.id}
+              entering={FadeInDown.delay(index * 100).springify()}
+            >
+              <ProductCard
+                id={product.id}
+                name={product.name}
+                images={product.images}
+                likeCount={product.like_count}
+                isLiked={true}
+                onPress={() => handleProductPress(product.id)}
+                onLike={() => handleLikePress(product.id)}
+                style={styles.productCard}
+                index={index}
+              />
+            </Animated.View>
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -114,42 +107,16 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: SPACING.lg,
   },
-  description: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: 16,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.xl,
-    textAlign: 'center',
-  },
-  list: {
-    paddingBottom: 120, // Space for tab bar
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   productCard: {
     flex: 1,
     margin: SPACING.xs,
-    maxWidth: '50%',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: SPACING.xxl,
-  },
-  emptyText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: 18,
-    color: COLORS.textPrimary,
-    textAlign: 'center',
-    marginBottom: SPACING.sm,
-  },
-  emptySubText: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: 16,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    marginBottom: SPACING.xl,
-  },
-  browseButton: {
-    marginTop: SPACING.md,
+    width: 150,
+    maxWidth: '100%',
   },
   centerContent: {
     flex: 1,
@@ -166,5 +133,12 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     width: 150,
+  },
+  message: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: 18,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginBottom: SPACING.xl,
   },
 });

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 
@@ -8,6 +8,7 @@ export type Catalog = {
   user_id: string;
   created_at: string;
   product_count?: number;
+  hasProduct?: boolean;
 };
 
 export type CatalogWithProducts = Catalog & {
@@ -18,64 +19,63 @@ export type CatalogWithProducts = Catalog & {
   }[];
 };
 
-export const useCatalogs = () => {
+export const useCatalogs = (productId?: string) => {
   const { user } = useAuth();
   const [catalogs, setCatalogs] = useState<Catalog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    if (!user) {
-      setCatalogs([]);
-      setLoading(false);
-      return;
-    }
-
-    const fetchCatalogs = async () => {
+  const fetchCatalogs = useCallback(async () => {
+    if (!user) return;
+    
+    try {
       setLoading(true);
       setError(null);
-      
-      try {
-        const { data: catalogsData, error: catalogsError } = await supabase
-          .from('catalogs')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
 
-        if (catalogsError) {
-          throw catalogsError;
-        }
+      let query = supabase
+        .from('catalogs')
+        .select(`
+          id,
+          name,
+          user_id,
+          created_at,
+          catalog_products (
+            product_id
+          )
+        `)
+        .eq('user_id', user.id);
 
-        if (catalogsData) {
-          // For each catalog, count the number of products
-          const catalogsWithCounts = await Promise.all(
-            catalogsData.map(async (catalog) => {
-              const { count, error: countError } = await supabase
-                .from('catalog_products')
-                .select('*', { count: 'exact', head: true })
-                .eq('catalog_id', catalog.id);
-              
-              if (countError) {
-                console.error('Error fetching product count:', countError);
-                return { ...catalog, product_count: 0 };
-              }
-              
-              return { ...catalog, product_count: count || 0 };
-            })
-          );
-          
-          setCatalogs(catalogsWithCounts);
-        }
-      } catch (error: any) {
-        console.error('Error fetching catalogs:', error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const { data, error } = await query;
 
+      if (error) throw error;
+
+      // Add hasProduct flag to each catalog
+      const catalogsWithProductStatus = data.map(catalog => ({
+        ...catalog,
+        hasProduct: productId 
+          ? catalog.catalog_products.some(cp => cp.product_id === productId)
+          : false
+      }));
+
+      setCatalogs(catalogsWithProductStatus);
+    } catch (err) {
+      setError(err as Error);
+      console.error('Error fetching catalogs:', err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [user, productId]);
+
+  useEffect(() => {
     fetchCatalogs();
-  }, [user]);
+  }, [fetchCatalogs]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchCatalogs();
+  }, [fetchCatalogs]);
 
   const createCatalog = async (name: string) => {
     if (!user) return { error: new Error('User not authenticated') };
@@ -141,7 +141,16 @@ export const useCatalogs = () => {
     }
   };
 
-  return { catalogs, loading, error, createCatalog, deleteCatalog, updateCatalog };
+  return { 
+    catalogs, 
+    loading, 
+    error, 
+    refreshing,
+    onRefresh,
+    createCatalog, 
+    deleteCatalog, 
+    updateCatalog 
+  };
 };
 
 export const useCatalogDetail = (id?: string) => {

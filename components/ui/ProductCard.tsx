@@ -50,9 +50,11 @@ export default function ProductCard({
           style={styles.image}
           contentFit="cover"
           transition={500}
+          cachePolicy="memory-disk"
+          placeholder={COLORS.black10}
         />
       </TouchableOpacity>
-      <GlassmorphicCard style={styles.infoCard}>
+      <View style={styles.infoCard}>
         <Text style={styles.name} numberOfLines={1}>
           {name} 
         </Text>
@@ -65,27 +67,28 @@ export default function ProductCard({
           >
             <Heart
               size={18}
-              color={isLiked ? COLORS.error : COLORS.white}
-              fill={isLiked ? COLORS.error : "transparent"}
+              color={isLiked ? COLORS.error : COLORS.black10}
+              fill={isLiked ? COLORS.error : COLORS.black10}
             />
           </TouchableOpacity>
           <Text style={styles.likeCount}>{likeCount}</Text>
         </View>
-      </GlassmorphicCard>
+      </View>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    width: "48%",
+    height: 200,
     borderRadius: 16,
     overflow: "hidden",
     ...SHADOWS.medium,
-    margin: SPACING.xs,
   },
   touchable: {
     width: "100%",
-    height: 200,
+    height: "100%",
   },
   image: {
     width: "100%",
@@ -93,22 +96,27 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   infoCard: {
-    // position: "absolute",
-    bottom: SPACING.sm,
-    left: SPACING.sm,
-    right: SPACING.sm,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
     display: "flex",
     flexDirection: "row",
+    borderRadius: 0,
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
+    backgroundColor: COLORS.white + "90",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
   name: {
     color: COLORS.black,
     fontFamily: "Poppins-SemiBold",
     fontSize: 14,
-    flexShrink: 1,
+    flex: 1,
+    marginRight: SPACING.sm,
   },
   likeContainer: {
     flexDirection: "row",
@@ -120,7 +128,7 @@ const styles = StyleSheet.create({
   likeCount: {
     color: COLORS.black,
     fontFamily: "Poppins-Medium",
-    fontSize: 12,
+    fontSize: 14,
     marginLeft: 4,
   },
 });

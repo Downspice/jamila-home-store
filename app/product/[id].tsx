@@ -14,6 +14,8 @@ import { Heart, Share2, Bookmark, Tag } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { supabase } from '@/lib/supabase';
+import ProductDetailSkeleton from '@/components/product/ProductDetailSkeleton';
+import SaveToCatalogSheet from '@/components/product/SaveToCatalogSheet';
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -21,9 +23,9 @@ export default function ProductDetailScreen() {
   const { user } = useAuth();
   const { product, loading } = useProductDetail(id as string);
   const { toggleLike, isLiked } = useLikes();
-  const { catalogs } = useCatalogs();
+  const { catalogs, createCatalog } = useCatalogs(id as string);
   
-  const [showCatalogOptions, setShowCatalogOptions] = useState(false);
+  const [showCatalogSheet, setShowCatalogSheet] = useState(false);
 
   const productIsLiked = product ? isLiked(product.id) : false;
 
@@ -53,10 +55,22 @@ export default function ProductDetailScreen() {
       if (error) throw error;
 
       Alert.alert('Success', 'Product added to catalog');
-      setShowCatalogOptions(false);
+      setShowCatalogSheet(false);
     } catch (error) {
       console.error('Error adding product to catalog:', error);
       Alert.alert('Error', 'Failed to add product to catalog');
+    }
+  };
+
+  const handleCreateCatalog = async (name: string) => {
+    try {
+      const result = await createCatalog(name);
+      if (result.error) {
+        throw result.error;
+      }
+    } catch (error) {
+      console.error('Error creating catalog:', error);
+      Alert.alert('Error', 'Failed to create catalog');
     }
   };
 
@@ -103,8 +117,17 @@ export default function ProductDetailScreen() {
       return;
     }
     
-    setShowCatalogOptions(true);
+    setShowCatalogSheet(true);
   };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Header showBackButton transparent showSearch onSearchPress={() => router.push('/search')} />
+        <ProductDetailSkeleton />
+      </View>
+    );
+  }
 
   if (!product && !loading) {
     return (
@@ -124,14 +147,17 @@ export default function ProductDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <Header showBackButton transparent showSearch onSearchPress={() => router.push('/search')} />
+      <Header title={product?.name || 'Product'} showBackButton />
       
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.content}>
         {product?.images && (
           <ImageCarousel images={product.images} height={400} />
         )}
         
-        <View style={styles.content}>
+        <ScrollView 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
           <Animated.View 
             entering={FadeInDown.delay(200).springify()}
             style={styles.titleContainer}
@@ -146,15 +172,19 @@ export default function ProductDetailScreen() {
                   fill={productIsLiked ? COLORS.error : 'transparent'} 
                   style={styles.likeIcon}
                 />
-                <Text style={styles.likeCount}>{product?.like_count || 0} likes</Text>
+                <Text style={styles.likeCount}>{product?.like_count || 0}</Text>
               </View>
               
               {product?.categories && product.categories.length > 0 && (
                 <View style={styles.categoryContainer}>
                   <Tag size={16} color={COLORS.textPrimary} style={styles.categoryIcon} />
-                  <Text style={styles.categoryText}>
-                    {product.categories.map(cat => cat.name).join(', ')}
-                  </Text>
+                  <View style={styles.categoryPillContainer}>
+                    {product.categories.map(cat => (
+                      <View key={cat.id} style={styles.categoryPill}>
+                        <Text style={styles.categoryText}>{cat.name}</Text>
+                      </View>
+                    ))}
+                  </View>
                 </View>
               )}
             </View>
@@ -167,46 +197,17 @@ export default function ProductDetailScreen() {
             <Text style={styles.descriptionTitle}>Description</Text>
             <Text style={styles.description}>{product?.description}</Text>
           </Animated.View>
-          
-          {showCatalogOptions && (
-            <Animated.View 
-              entering={FadeInDown.springify()}
-              style={styles.catalogOptionsContainer}
-            >
-              <GlassmorphicCard style={styles.catalogOptionsCard}>
-                <Text style={styles.catalogOptionsTitle}>Save to Catalog</Text>
-                
-                {catalogs.map(catalog => (
-                  <TouchableOpacity
-                    key={catalog.id}
-                    style={styles.catalogOption}
-                    onPress={() => handleAddToCatalog(catalog.id)}
-                  >
-                    <Bookmark size={20} color={COLORS.primary} style={styles.catalogIcon} />
-                    <Text style={styles.catalogName}>{catalog.name}</Text>
-                  </TouchableOpacity>
-                ))}
-                
-                <Button
-                  title="Cancel"
-                  onPress={() => setShowCatalogOptions(false)}
-                  variant="outline"
-                  style={styles.cancelButton}
-                />
-              </GlassmorphicCard>
-            </Animated.View>
-          )}
-        </View>
+        </ScrollView>
       </ScrollView>
       
       <LinearGradient
-        colors={['transparent', COLORS.black20]}
+        colors={[COLORS.white, COLORS.white]}
         style={styles.actionsContainer}
       >
         <Button
           title={productIsLiked ? "Liked" : "Like"}
           onPress={handleLikePress}
-          variant={productIsLiked ? "secondary" : "outline"}
+          variant={productIsLiked ? "outline" : "outline"}
           icon={
             <Heart 
               size={18} 
@@ -215,7 +216,7 @@ export default function ProductDetailScreen() {
             />
           }
           iconPosition="left"
-          style={styles.actionButton}
+          style={productIsLiked ? styles.hidden : styles.actionButton}
         />
         
         <Button
@@ -230,12 +231,20 @@ export default function ProductDetailScreen() {
         <Button
           title="Share"
           onPress={handleShareProduct}
-          variant="primary"
-          icon={<Share2 size={18} color={COLORS.white} />}
+          variant="outline"
+          icon={<Share2 size={18} color={COLORS.primary} />}
           iconPosition="left"
           style={styles.actionButton}
         />
       </LinearGradient>
+
+      <SaveToCatalogSheet
+        isVisible={showCatalogSheet}
+        onClose={() => setShowCatalogSheet(false)}
+        catalogs={catalogs}
+        onSelectCatalog={handleAddToCatalog}
+        onCreateCatalog={handleCreateCatalog}
+      />
     </View>
   );
 }
@@ -246,6 +255,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   content: {
+    flex: 1,
+  },
+  scrollContent: {
     padding: SPACING.xl,
     paddingBottom: 100, // Space for action buttons
   },
@@ -254,7 +266,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontFamily: 'Playfair-Bold',
-    fontSize: 28,
+    fontSize: 20,
     color: COLORS.textPrimary,
     marginBottom: SPACING.sm,
   },
@@ -283,9 +295,19 @@ const styles = StyleSheet.create({
   categoryIcon: {
     marginRight: 4,
   },
+  categoryPill: {
+    borderRadius: 100,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    marginRight: SPACING.sm,
+    fontFamily: 'Poppins-Medium',
+    fontSize: 13,
+    color: COLORS.textSecondary,
+  },
   categoryText: {
     fontFamily: 'Poppins-Medium',
-    fontSize: 14,
+    fontSize: 13,
     color: COLORS.textSecondary,
   },
   descriptionContainer: {
@@ -299,7 +321,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontFamily: 'Poppins-Regular',
-    fontSize: 16,
+    fontSize: 13,
     color: COLORS.textPrimary,
     lineHeight: 24,
   },
@@ -310,18 +332,23 @@ const styles = StyleSheet.create({
     right: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: SPACING.xl,
-    paddingBottom: 34,
+    padding: SPACING.md,
+    paddingBottom: 30,
   },
   actionButton: {
     flex: 1,
-    marginHorizontal: 4,
+    marginHorizontal: 1,
+    height: 30,
   },
   catalogOptionsContainer: {
     marginBottom: SPACING.xl,
   },
   catalogOptionsCard: {
     
+  },
+  categoryPillContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   catalogOptionsTitle: {
     fontFamily: 'Poppins-SemiBold',
@@ -362,5 +389,8 @@ const styles = StyleSheet.create({
   },
   backButton: {
     width: 150,
+  },
+  hidden: {
+    display: 'none',
   },
 });
