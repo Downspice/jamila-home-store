@@ -13,6 +13,7 @@ import { COLORS, FONTS, SPACING } from "@/constants/theme";
 import { ArrowLeft, Search, User } from "lucide-react-native";
 import { BlurView } from "expo-blur";
 import { useAuth } from "@/context/AuthContext";
+import ProductDetailSkeleton from "../product/ProductDetailSkeleton";
 
 interface HeaderProps {
   title?: string;
@@ -23,6 +24,7 @@ interface HeaderProps {
   onSearchPress?: () => void;
   onProfilePress?: () => void;
   transparent?: boolean;
+  productDetail?: boolean;
 }
 
 export default function Header({
@@ -34,6 +36,7 @@ export default function Header({
   onSearchPress,
   onProfilePress,
   transparent = false,
+  productDetail=false
 }: HeaderProps) {
   const router = useRouter();
   const { profile } = useAuth();
@@ -43,63 +46,78 @@ export default function Header({
     router.back();
   };
 
-  // if (transparent) {
-  //   return (
-  //     <View style={[styles.container, styles.transparentContainer]}>
-  //       {showBackButton && (
-  //         <TouchableOpacity
-  //           onPress={handleBackPress}
-  //           style={styles.iconButton}
-  //           activeOpacity={0.7}
-  //           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-  //         >
-  //           <BlurView intensity={80} tint="light" style={styles.blurButton}>
-  //             <ArrowLeft size={22} color={COLORS.white} />
-  //           </BlurView>
-  //         </TouchableOpacity>
-  //       )}
+  if(productDetail){
+    return(
+      <View style={[ styles.productDetailContainer]}>
+          
+            <TouchableOpacity
+              onPress={handleBackPress}
+              style={styles.iconButton}
+              activeOpacity={0.7}
+            >
+              <ArrowLeft size={22} color={COLORS.white} />
+            </TouchableOpacity>
+          </View>
+         
+    );
+  }
+  if (transparent) {
+    return (
+      <View style={[ styles.transparentContainer]}>
+        {showBackButton && (
+          <TouchableOpacity
+            onPress={handleBackPress}
+            style={styles.iconButton}
+            activeOpacity={0.7}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <BlurView intensity={80} tint="light" style={styles.blurButton}>
+              <ArrowLeft size={22} color={COLORS.white} />
+            </BlurView>
+          </TouchableOpacity>
+        )}
 
-  //       {title && (
-  //         <Text style={[styles.title, styles.transparentTitle]}>{title}</Text>
-  //       )}
+        {/* {title && (
+          <Text style={[styles.title, styles.transparentTitle]}>{title}</Text>
+        )} */}
 
-  //       <View style={styles.rightContainer}>
-  //         {showSearch && (
-  //           <TouchableOpacity
-  //             onPress={onSearchPress}
-  //             style={styles.iconButton}
-  //             activeOpacity={0.7}
-  //             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-  //           >
-  //             <BlurView intensity={80} tint="light" style={styles.blurButton}>
-  //               <Search size={22} color={COLORS.white} />
-  //             </BlurView>
-  //           </TouchableOpacity>
-  //         )}
+        <View style={styles.rightContainer}>
+          {showSearch && (
+            <TouchableOpacity
+              onPress={onSearchPress}
+              style={styles.iconButton}
+              activeOpacity={0.7}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <BlurView intensity={80} tint="light" style={styles.blurButton}>
+                <Search size={22} color={COLORS.white} />
+              </BlurView>
+            </TouchableOpacity>
+          )}
 
-  //         {showProfile && (
-  //           <TouchableOpacity
-  //             onPress={onProfilePress}
-  //             style={[styles.iconButton, showSearch && styles.leftMargin]}
-  //             activeOpacity={0.7}
-  //             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-  //           >
-  //             <BlurView intensity={80} tint="light" style={styles.blurButton}>
-  //               {avatar ? (
-  //                 <Image
-  //                   source={{ uri: avatar }}
-  //                   style={{ width: 22, height: 22, borderRadius: 10 }}
-  //                 />
-  //               ) : (
-  //                 <User size={22} color={COLORS.white} />
-  //               )}
-  //             </BlurView>
-  //           </TouchableOpacity>
-  //         )}
-  //       </View>
-  //     </View>
-  //   );
-  // }
+          {showProfile && (
+            <TouchableOpacity
+              onPress={onProfilePress}
+              style={[styles.iconButton, showSearch && styles.leftMargin]}
+              activeOpacity={0.7}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <BlurView intensity={80} tint="light" style={styles.blurButton}>
+                {avatar ? (
+                  <Image
+                    source={{ uri: avatar }}
+                    style={{ width: 22, height: 22, borderRadius: 10 }}
+                  />
+                ) : (
+                  <User size={22} color={COLORS.white} />
+                )}
+              </BlurView>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -161,7 +179,7 @@ export default function Header({
               onPress={onProfilePress}
               style={[styles.iconButton, showSearch && styles.leftMargin]}
               activeOpacity={0.7}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              hitSlop={{ top: 2, bottom: 2, left: 5, right: 5 }}
             >
               <BlurView intensity={80} tint="light" style={styles.blurButton}>
                 {avatar ? (
@@ -182,6 +200,17 @@ export default function Header({
 }
 
 const styles = StyleSheet.create({
+  transparentContainer: {
+    backgroundColor: "transparent",
+  },
+  productDetailContainer: {
+    backgroundColor: "transparent",
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.black5,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: Platform.OS === "ios" ? 50 : SPACING.lg,
+    paddingBottom: SPACING.sm,
+  },
   container: {
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
@@ -205,7 +234,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: SPACING.lg,
     paddingTop: Platform.OS === "ios" ? 50 : SPACING.lg,
-    paddingBottom: SPACING.md,
+    paddingBottom: SPACING.sm,
   },
   title: {
     flex: 1,

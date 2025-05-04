@@ -158,39 +158,122 @@ export default function AdminScreen() {
   };
 
   const handleDeleteCategory = async (id: string) => {
-    Alert.alert(
-      "Delete Category",
-      "Are you sure you want to delete this category? This will also remove all product associations.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const { error } = await supabase
-                .from("categories")
-                .delete()
-                .eq("id", id);
+    try {
+      // Check if there are products in this category
+      const { data: products, error: productsError } = await supabase
+        .from('product_categories')
+        .select('product_id')
+        .eq('category_id', id);
 
-              if (error) throw error;
+      if (productsError) throw productsError;
 
-              await refetchCategories();
-              Alert.alert("Success", "Category deleted successfully", [
-                {
-                  text: "OK",
-                  onPress: () => {
-                    router.back();
-                  },
-                },
-              ]);
-            } catch (error: any) {
-              Alert.alert("Error", error.message);
-            }
-          },
-        },
-      ]
-    );
+      if (products && products.length > 0) {
+        // Get all available categories except the one being deleted
+        const { data: otherCategories, error: categoriesError } = await supabase
+          .from('categories')
+          .select('id, name')
+          .neq('id', id);
+
+        if (categoriesError) throw categoriesError;
+
+        if (!otherCategories || otherCategories.length === 0) {
+          Alert.alert(
+            'Error',
+            'Cannot delete the last category. Please create another category first.'
+          );
+          return;
+        }
+
+        // Show dialog to select new category
+        Alert.alert(
+          'Reassign Products',
+          'This category contains products. Please select a new category to reassign them to:',
+          [
+            ...otherCategories.map(category => ({
+              text: category.name,
+              onPress: async () => {
+                try {
+                  // Update all products to the new category
+                  const { error: updateError } = await supabase
+                    .from('product_categories')
+                    .update({ category_id: category.id })
+                    .eq('category_id', id);
+
+                  if (updateError) throw updateError;
+
+                  // Get the category's image URL before deleting
+                  const { data: categoryData, error: categoryError } = await supabase
+                    .from('categories')
+                    .select('image_url')
+                    .eq('id', id)
+                    .single();
+
+                  if (categoryError) throw categoryError;
+
+                  // Delete the category
+                  const { error: deleteError } = await supabase
+                    .from('categories')
+                    .delete()
+                    .eq('id', id);
+
+                  if (deleteError) throw deleteError;
+
+                  // Delete the avatar from storage if it exists
+                  if (categoryData?.image_url) {
+                    const fileName = categoryData.image_url.split('/').pop();
+                    if (fileName) {
+                      await supabase.storage
+                        .from('category-avatars')
+                        .remove([`category-avatars/${fileName}`]);
+                    }
+                  }
+
+                  await refetchCategories();
+                  Alert.alert('Success', 'Category deleted and products reassigned successfully');
+                } catch (error: any) {
+                  Alert.alert('Error', error.message);
+                }
+              },
+            })),
+            {
+              text: 'Cancel',
+              style: 'cancel',
+            },
+          ]
+        );
+      } else {
+        // No products in this category, proceed with deletion
+        const { data: categoryData, error: categoryError } = await supabase
+          .from('categories')
+          .select('image_url')
+          .eq('id', id)
+          .single();
+
+        if (categoryError) throw categoryError;
+
+        const { error: deleteError } = await supabase
+          .from('categories')
+          .delete()
+          .eq('id', id);
+
+        if (deleteError) throw deleteError;
+
+        // Delete the avatar from storage if it exists
+        if (categoryData?.image_url) {
+          const fileName = categoryData.image_url.split('/').pop();
+          if (fileName) {
+            await supabase.storage
+              .from('category-avatars')
+              .remove([`category-avatars/${fileName}`]);
+          }
+        }
+
+        await refetchCategories();
+        Alert.alert('Success', 'Category deleted successfully');
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    }
   };
 
   useFocusEffect(

@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { COLORS, FONTS, SHADOWS, SPACING } from '@/constants/theme';
 
 interface CategoryCardProps {
@@ -22,7 +22,6 @@ export default function CategoryCard({
   style,
   index = 0,
 }: CategoryCardProps) {
-  // Default image if none provided
   const imageUrl = image || 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg';
 
   return (
@@ -31,7 +30,7 @@ export default function CategoryCard({
       style={[styles.container, style]}
     >
       <TouchableOpacity 
-        activeOpacity={0.8}
+        activeOpacity={0.9}
         onPress={onPress}
         style={styles.touchable}
       >
@@ -42,49 +41,47 @@ export default function CategoryCard({
           transition={300}
         />
         <LinearGradient
-          colors={['transparent', COLORS.black70]}
+          colors={['transparent', 'rgba(0,0,0,0.8)']}
           style={styles.gradient}
         >
-          <Text style={styles.name}>{name}</Text>
+          <Text style={styles.name}>{name.toUpperCase()}</Text>
         </LinearGradient>
-      </TouchableOpacity>
+      </TouchableOpacity>  
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: 'hidden',
-    ...SHADOWS.medium,
-    margin: SPACING.xs,
-    height: 120,
+    ...SHADOWS.large,
+    margin: SPACING.sm,
+    height: 180,
     width: 160,
+    backgroundColor: COLORS.white,
   },
   touchable: {
-    width: '100%',
-    height: '100%',
+    flex: 1,
   },
   image: {
     width: '100%',
     height: '100%',
-    borderRadius: 16,
+    borderRadius: 20,
   },
   gradient: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: '100%',
+    height: '45%',
     justifyContent: 'flex-end',
-    paddingBottom: SPACING.md,
-    paddingHorizontal: SPACING.md,
-    borderRadius: 16,
+    padding: SPACING.md,
   },
   name: {
     color: COLORS.white,
-    fontFamily: 'Playfair-Bold',
-    fontSize: 16,
-    textAlign: 'center',
+    fontFamily: FONTS.bold,
+    fontSize: 18,
+    letterSpacing: 1,
   },
 });

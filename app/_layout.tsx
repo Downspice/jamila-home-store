@@ -1,36 +1,36 @@
-import { useCallback, useEffect } from 'react';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useFonts } from 'expo-font';
-import { 
+import { useCallback, useEffect } from "react";
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useFonts } from "expo-font";
+import {
   Poppins_400Regular,
   Poppins_500Medium,
   Poppins_600SemiBold,
-  Poppins_700Bold
-} from '@expo-google-fonts/poppins';
+  Poppins_700Bold,
+} from "@expo-google-fonts/poppins";
 import {
   PlayfairDisplay_400Regular,
-  PlayfairDisplay_700Bold
-} from '@expo-google-fonts/playfair-display';
-import { SplashScreen } from 'expo-router';
-import { useFrameworkReady } from '@/hooks/useFrameworkReady';
-import { AuthProvider } from '@/context/AuthContext';
-import * as SplashScreenLib from 'expo-splash-screen';
-import { MenuProvider } from 'react-native-popup-menu';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+  PlayfairDisplay_700Bold,
+} from "@expo-google-fonts/playfair-display";
+import { SplashScreen } from "expo-router";
+import { useFrameworkReady } from "@/hooks/useFrameworkReady";
+import { AuthProvider } from "@/context/AuthContext";
+import * as SplashScreenLib from "expo-splash-screen";
+import { MenuProvider } from "react-native-popup-menu";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // Prevent automatic splash screen hiding
 SplashScreenLib.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    'Poppins-Regular': Poppins_400Regular,
-    'Poppins-Medium': Poppins_500Medium,
-    'Poppins-SemiBold': Poppins_600SemiBold,
-    'Poppins-Bold': Poppins_700Bold,
-    'Playfair-Regular': PlayfairDisplay_400Regular,
-    'Playfair-Bold': PlayfairDisplay_700Bold,
+    "Poppins-Regular": Poppins_400Regular,
+    "Poppins-Medium": Poppins_500Medium,
+    "Poppins-SemiBold": Poppins_600SemiBold,
+    "Poppins-Bold": Poppins_700Bold,
+    "Playfair-Regular": PlayfairDisplay_400Regular,
+    "Playfair-Bold": PlayfairDisplay_700Bold,
   });
 
   useFrameworkReady();
@@ -62,7 +62,7 @@ export default function RootLayout() {
             >
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" options={{ title: 'Oops!' }} />
+              <Stack.Screen name="+not-found" options={{ title: "Oops!" }} />
             </Stack>
             <StatusBar style="auto" />
           </BottomSheetModalProvider>

@@ -6,9 +6,8 @@ import {
   ScrollView,
   TouchableOpacity,
   FlatList,
-  Image,
   RefreshControl,
-  Platform,
+  useWindowDimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
@@ -19,24 +18,19 @@ import ProductCard from "@/components/ui/ProductCard";
 import CategoryCard from "@/components/ui/CategoryCard";
 import CategorySkeleton from "@/components/ui/CategorySkeleton";
 import { CategorySection } from "@/components/CategorySection";
-import SearchBar from "@/components/shared/SearchBar";
 import Header from "@/components/shared/Header";
-import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { Search } from "lucide-react-native";
-import { Image as ExpoImage } from 'expo-image';
 
-// Cache for product images
 const imageCache = new Map<string, string>();
 
 export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
+  const { width: screenWidth } = useWindowDimensions();
 
   const {
     products,
     loading: productsLoading,
-    error,
     refreshing,
     onRefresh,
   } = useProducts();
@@ -57,21 +51,10 @@ export default function HomeScreen() {
     }
   }, [products]);
 
-  const handleSearch = () => {
-    router.push("/search");
-  };
-
-  const handleProductPress = (id: string) => {
-    router.push(`/product/${id}`);
-  };
-
-  const handleCategoryPress = (id: string) => {
-    router.push(`/category/${id}`);
-  };
-
-  const handleLikePress = async (id: string) => {
-    await toggleLike(id);
-  };
+  const handleSearch = () => router.push("/search");
+  const handleProductPress = (id: string) => router.push(`/product/${id}`);
+  const handleCategoryPress = (id: string) => router.push(`/category/${id}`);
+  const handleLikePress = async (id: string) => await toggleLike(id);
 
   const renderCategoryItem = ({ item, index }: any) => (
     <CategoryCard
@@ -83,18 +66,25 @@ export default function HomeScreen() {
     />
   );
 
+  // Responsive Grid Logic
+  const minCardWidth = 200;
+  const cardSpacing = SPACING.md;
+  const horizontalPadding = SPACING.lg * 2;
+  const availableWidth = screenWidth - horizontalPadding;
+  const numColumns = Math.max(2, Math.floor(availableWidth / (minCardWidth + cardSpacing)));
+  const cardWidth = (availableWidth - cardSpacing * (numColumns - 1)) / numColumns;
+
   return (
     <View style={styles.container}>
-      
-      <Header title="" 
-      showBackButton={false} 
-      transparent = {false}
-      showSearchBar = {true}
-      showProfile = {true}
-
-      onSearchPress={handleSearch}
+      <Header
+        title=""
+        showBackButton={false}
+        transparent={false}
+        showSearchBar={true}
+        showProfile={true}
+        onSearchPress={handleSearch}
       />
-      
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -151,23 +141,30 @@ export default function HomeScreen() {
 
             <View style={styles.productsGrid}>
               {products.map((product, index) => (
-                <ProductCard
+                <View
                   key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  images={product.images}
-                  likeCount={product.like_count}
-                  isLiked={isLiked(product.id)}
-                  onPress={() => handleProductPress(product.id)}
-                  onLike={() => handleLikePress(product.id)}
-                  index={index}
-                />
+                  style={{
+                    width: cardWidth,
+                    marginBottom: SPACING.md,
+                    marginRight: (index + 1) % numColumns === 0 ? 0 : cardSpacing,
+                  }}
+                >
+                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    images={product.images}
+                    likeCount={product.like_count}
+                    isLiked={isLiked(product.id)}
+                    onPress={() => handleProductPress(product.id)}
+                    onLike={() => handleLikePress(product.id)}
+                    index={index}
+                  />
+                </View>
               ))}
             </View>
           </Animated.View>
         </View>
       </ScrollView>
-      
     </View>
   );
 }
@@ -177,17 +174,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  contentContainer: {
-    flex: 1,
-    padding: 36,
-    alignItems: 'center',
-  },
   content: {
     flex: 1,
     paddingBottom: SPACING.lg,
   },
   section: {
-   marginBottom: SPACING.xl,
+    marginBottom: SPACING.xl,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -213,8 +205,6 @@ const styles = StyleSheet.create({
   productsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
     paddingHorizontal: SPACING.lg,
-    gap: SPACING.sm,
-  }
+  },
 });
