@@ -168,6 +168,7 @@ export default function ProductDetailScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
+          {/* the preview would go here */}
           <View style={styles.nameRow}>
             {product?.images.map((image) => (
               <View key={image} style={styles.imageContainer}>
@@ -390,6 +391,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 1,
     height: 35,
     borderRadius: 100,
+    // width: "50%",
   },
   catalogOptionsContainer: {
     marginBottom: SPACING.xl,
