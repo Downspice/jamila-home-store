@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, FlatList } from 'react-native';
+import { StyleSheet, View, Text, FlatList, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { COLORS, SPACING } from '@/constants/theme';
 import { useProducts } from '@/hooks/useProducts';
@@ -16,6 +16,7 @@ export default function CategoryDetailScreen() {
   const { category, loading: categoryLoading } = useCategoryDetail(id as string);
   const { products, loading: productsLoading } = useProducts(id as string);
   const { toggleLike, isLiked } = useLikes();
+  const { width: screenWidth } = useWindowDimensions();
 
   const handleProductPress = (productId: string) => {
     router.push(`/product/${productId}`);
@@ -25,20 +26,28 @@ export default function CategoryDetailScreen() {
     await toggleLike(productId);
   };
 
-  const renderItem = ({ item, index }: any) => (
-    <ProductCard
-      id={item.id}
-      name={item.name}
-      images={item.images}
-      likeCount={item.like_count}
-      isLiked={isLiked(item.id)}
-      onPress={() => handleProductPress(item.id)}
-      onLike={() => handleLikePress(item.id)}
-      style={styles.productCard}
-      index={index}
-    />
-  );
+  // const renderItem = ({ item, index }: any) => (
+  //   <ProductCard
+  //     id={item.id}
+  //     name={item.name}
+  //     images={item.images}
+  //     likeCount={item.like_count}
+  //     isLiked={isLiked(item.id)}
+  //     onPress={() => handleProductPress(item.id)}
+  //     onLike={() => handleLikePress(item.id)}
+  //     style={styles.productCard}
+  //     index={index}
+  //   />
+  // );
 
+    // Responsive Grid Logic
+    const minCardWidth = 200;
+    const cardSpacing = SPACING.md;
+    const horizontalPadding = SPACING.lg * 2;
+    const availableWidth = screenWidth - horizontalPadding;
+    const numColumns = Math.max(2, Math.floor(availableWidth / (minCardWidth + cardSpacing)));
+    const cardWidth = (availableWidth - cardSpacing * (numColumns - 1)) / numColumns;
+  
   return (
     <View style={styles.container}>
       <Header 
@@ -52,7 +61,32 @@ export default function CategoryDetailScreen() {
         entering={FadeInDown.delay(200).springify()}
         style={styles.content}
       >
-        <FlatList
+
+<View style={styles.productsGrid}>
+              {products.map((product, index) => (
+                <View
+                  key={product.id}
+                  style={{
+                    width: cardWidth,
+                    marginBottom: SPACING.md,
+                    marginRight: (index + 1) % numColumns === 0 ? 0 : cardSpacing,
+                  }}
+                >
+                  <ProductCard
+                    id={product.id}
+                    name={product.name}
+                    images={product.images}
+                    likeCount={product.like_count}
+                    isLiked={isLiked(product.id)}
+                    onPress={() => handleProductPress(product.id)}
+                    onLike={() => handleLikePress(product.id)}
+                    index={index}
+                  />
+                </View>
+              ))}
+            </View>
+
+        {/* <FlatList
           data={products}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
@@ -63,7 +97,7 @@ export default function CategoryDetailScreen() {
             category?.description ? (
               <Text style={styles.description}>
                 {/* {category.description} */}
-              </Text>
+              {/* </Text>
             ) : null
           }
           ListEmptyComponent={
@@ -75,7 +109,7 @@ export default function CategoryDetailScreen() {
               </View>
             ) : null
           }
-        />
+        /> */}  
       </Animated.View>
     </View>
   );
@@ -110,4 +144,9 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     textAlign: 'center',
   },
+  productsGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      paddingHorizontal: SPACING.lg,
+    },
 });

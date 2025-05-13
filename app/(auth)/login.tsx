@@ -86,6 +86,7 @@ export default function LoginScreen() {
 
             <Button
               title="Sign In"
+              variant='secondary'
               onPress={handleLogin}
               loading={loading}
               style={styles.loginButton}
@@ -163,7 +164,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   loginButton: {
-    marginTop: SPACING.md,
+    // marginTop: SPACING.md,
   },
   footerContainer: {
     flexDirection: 'row',

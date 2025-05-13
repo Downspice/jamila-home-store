@@ -91,10 +91,17 @@ export const COLORS = {
   card: '#FFFFFF',
   success: '#4CAF50',
   info: '#2196F3',
-  warning: '#FB8C00',
+  warning : '#FB8C00',
+  danger : '#F44336', 
   error: '#F44336',
   disabled: '#CCCCCC',
   inactive: '#A0A0A0',
+
+  //background
+  screenBackground: '#f6f5ed',
+
+  //border
+  border: 'rgba(0, 0, 0, 0.1)',
 };
 
 export const SHADOWS = {

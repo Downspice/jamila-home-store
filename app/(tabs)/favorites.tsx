@@ -10,6 +10,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAuth } from '@/context/AuthContext';
 import Button from '@/components/ui/Button';
 import ProductSkeleton from '@/components/ui/ProductSkeleton';
+import UnAuthenticatedScreen from '@/components/ui/UnauthenticatedScreen';
 
 export default function FavoritesScreen() {
   const router = useRouter();
@@ -34,14 +35,7 @@ export default function FavoritesScreen() {
     return (
       <View style={styles.container}>
         <Header title="Favorites" showBackButton={false} />
-        <View style={styles.centerContent}>
-          <Text style={styles.loginMessage}>Please sign in to view your favorites</Text>
-          <Button 
-            title="Sign In" 
-            onPress={() => router.push('/login')} 
-            style={styles.loginButton}
-          />
-        </View>
+        <UnAuthenticatedScreen/>
       </View>
     );
   }
@@ -61,7 +55,6 @@ export default function FavoritesScreen() {
   return (
     <View style={styles.container}>
       <Header title="Favorites" />
-      
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
@@ -101,7 +94,7 @@ export default function FavoritesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#f6f5ed',
   },
   content: {
     flex: 1,
@@ -115,7 +108,7 @@ const styles = StyleSheet.create({
   productCard: {
     flex: 1,
     margin: SPACING.xs,
-    width: 150,
+    width: 160,
     maxWidth: '100%',
   },
   centerContent: {

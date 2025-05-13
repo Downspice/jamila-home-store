@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  Platform,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '@/constants/theme';
@@ -17,7 +17,7 @@ import { useProfile } from '@/hooks/useProfile';
 import Header from '@/components/shared/Header';
 import Button from '@/components/ui/Button';
 import GlassmorphicCard from '@/components/ui/GlassmorphicCard';
-import { Edit2, Camera, X } from 'lucide-react-native';
+import { Camera, X } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '@/lib/supabase';
 import { decode } from 'base64-arraybuffer';
@@ -26,12 +26,12 @@ export default function EditProfileScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { profile, loading: profileLoading, refetch } = useProfile();
+
   const [loading, setLoading] = useState(false);
   const [fullName, setFullName] = useState('');
   const [avatar, setAvatar] = useState('');
   const [tempAvatar, setTempAvatar] = useState<string | null>(null);
 
-  // Update form fields when profile data is loaded
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || '');
@@ -40,93 +40,70 @@ export default function EditProfileScreen() {
   }, [profile]);
 
   const pickImage = async () => {
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission required', 'Please grant permission to access your photos');
-        return;
-      }
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'We need access to your media to upload an avatar.');
+      return;
+    }
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-        base64: true,
-      });
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+      base64: true,
+    });
 
-      if (!result.canceled && result.assets[0].base64) {
-        setTempAvatar(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image. Please try again.');
+    if (!result.canceled && result.assets[0].uri) {
+      setTempAvatar(result.assets[0].uri);
     }
   };
 
   const uploadAvatar = async (uri: string) => {
-    try {
-      // Get base64 data from the image
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      const reader = new FileReader();
-      
-      return new Promise((resolve, reject) => {
-        reader.onload = async () => {
-          try {
-            const base64 = reader.result as string;
-            const base64Data = base64.split(',')[1];
-            const fileExt = uri.split('.').pop();
-            const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const reader = new FileReader();
 
-            // Delete old avatar if exists
-            if (avatar) {
-              const oldAvatarPath = avatar.split('/').pop();
-              if (oldAvatarPath) {
-                await supabase.storage
-                  .from('avatars')
-                  .remove([oldAvatarPath]);
-              }
-            }
+    return new Promise<string>((resolve, reject) => {
+      reader.onload = async () => {
+        try {
+          const base64 = reader.result as string;
+          const base64Data = base64.split(',')[1];
+          const fileExt = uri.split('.').pop();
+          const fileName = `${user?.id}-${Date.now()}.${fileExt}`;
 
-            // Upload new avatar
-            const { error: uploadError } = await supabase.storage
-              .from('avatars')
-              .upload(fileName, decode(base64Data), {
-                contentType: `image/${fileExt}`,
-                upsert: true,
-              });
-
-            if (uploadError) throw uploadError;
-
-            const { data: { publicUrl } } = supabase.storage
-              .from('avatars')
-              .getPublicUrl(fileName);
-
-            resolve(publicUrl);
-          } catch (error) {
-            console.error('Error in upload process:', error);
-            reject(error);
+          // Remove old avatar
+          if (avatar) {
+            const oldPath = avatar.split('/').pop();
+            oldPath && await supabase.storage.from('avatars').remove([oldPath]);
           }
-        };
 
-        reader.onerror = (error) => {
-          console.error('Error reading file:', error);
-          reject(error);
-        };
+          const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(fileName, decode(base64Data), {
+              contentType: `image/${fileExt}`,
+              upsert: true,
+            });
 
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.error('Error in uploadAvatar:', error);
-      Alert.alert('Error', 'Failed to upload avatar. Please try again.');
-      throw error;
-    }
+          if (uploadError) throw uploadError;
+
+          const { data } = supabase.storage.from('avatars').getPublicUrl(fileName);
+          resolve(data.publicUrl);
+        } catch (err) {
+          console.error(err);
+          Alert.alert('Upload Error', 'Could not upload your avatar.');
+          reject(err);
+        }
+      };
+
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
   };
 
   const handleSave = async () => {
     if (!user) return;
-    
+
     try {
       setLoading(true);
       let avatarUrl = avatar;
@@ -137,22 +114,16 @@ export default function EditProfileScreen() {
 
       const { error } = await supabase
         .from('profiles')
-        .update({ 
-          full_name: fullName,
-          avatar_url: avatarUrl,
-        })
+        .update({ full_name: fullName, avatar_url: avatarUrl })
         .eq('id', user.id);
 
       if (error) throw error;
 
-      // Refresh the profile data
       await refetch();
-
-      // Navigate back to settings page
       router.back();
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      Alert.alert('Error', 'Failed to update profile. Please try again.');
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Update Error', 'Could not update your profile.');
     } finally {
       setLoading(false);
     }
@@ -160,11 +131,9 @@ export default function EditProfileScreen() {
 
   if (profileLoading) {
     return (
-      <View style={styles.container}>
-        <Header title="Edit Profile" showBackButton />
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading profile...</Text>
-        </View>
+      <View style={styles.loadingWrapper}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={styles.loadingText}>Loading your profile...</Text>
       </View>
     );
   }
@@ -172,25 +141,19 @@ export default function EditProfileScreen() {
   return (
     <View style={styles.container}>
       <Header title="Edit Profile" showBackButton />
-      
-      <ScrollView style={styles.content}>
-        <GlassmorphicCard style={styles.card}>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}> 
           <View style={styles.avatarContainer}>
             <Image
               source={{ uri: tempAvatar || avatar || '' }}
               style={styles.avatar}
             />
-            <TouchableOpacity
-              style={styles.editAvatarButton}
-              onPress={pickImage}
-            >
+
+            <TouchableOpacity style={styles.editButton} onPress={pickImage}>
               <Camera size={20} color={COLORS.white} />
             </TouchableOpacity>
+
             {tempAvatar && (
-              <TouchableOpacity
-                style={styles.removeAvatarButton}
-                onPress={() => setTempAvatar(null)}
-              >
+              <TouchableOpacity style={styles.removeButton} onPress={() => setTempAvatar(null)}>
                 <X size={20} color={COLORS.white} />
               </TouchableOpacity>
             )}
@@ -215,11 +178,8 @@ export default function EditProfileScreen() {
               editable={false}
               placeholderTextColor={COLORS.textSecondary}
             />
-            <Text style={styles.helpText}>
-              Email cannot be changed. Contact support if needed.
-            </Text>
-          </View>
-        </GlassmorphicCard>
+            <Text style={styles.helpText}>Email can't be changed. Contact support to update it.</Text>
+          </View> 
 
         <Button
           title="Save Changes"
@@ -235,7 +195,7 @@ export default function EditProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.screenBackground,
   },
   content: {
     flex: 1,
@@ -247,38 +207,36 @@ const styles = StyleSheet.create({
   avatarContainer: {
     alignItems: 'center',
     marginBottom: SPACING.xl,
+    position: 'relative',
   },
   avatar: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    marginBottom: SPACING.md,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
   },
-  editAvatarButton: {
+  editButton: {
     position: 'absolute',
     bottom: 0,
-    right: 0,
+    right: 20,
     backgroundColor: COLORS.primary,
-    width: 40,
-    height: 40,
+    padding: 10,
     borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: COLORS.background,
+    borderColor: COLORS.white,
+    borderWidth: 2,
+    elevation: 3,
   },
-  removeAvatarButton: {
+  removeButton: {
     position: 'absolute',
     bottom: 0,
-    left: 0,
+    left: 20,
     backgroundColor: COLORS.danger,
-    width: 40,
-    height: 40,
+    padding: 10,
     borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: COLORS.background,
+    borderColor: COLORS.white,
+    borderWidth: 2,
+    elevation: 3,
   },
   formGroup: {
     marginBottom: SPACING.lg,
@@ -312,14 +270,16 @@ const styles = StyleSheet.create({
   saveButton: {
     marginTop: SPACING.xl,
   },
-  loadingContainer: {
+  loadingWrapper: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: COLORS.screenBackground,
   },
   loadingText: {
+    marginTop: 10,
     fontFamily: 'Poppins-Regular',
     fontSize: 16,
     color: COLORS.textSecondary,
   },
-}); 
+});

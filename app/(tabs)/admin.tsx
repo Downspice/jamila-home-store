@@ -370,7 +370,7 @@ export default function AdminScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#f6f5ed',
   },
   tabsContainer: {
     flexDirection: "row",

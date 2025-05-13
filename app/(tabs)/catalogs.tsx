@@ -1,17 +1,27 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, FlatList, Modal, TouchableOpacity, RefreshControl, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import { COLORS, SPACING, SHADOWS } from '@/constants/theme';
-import Header from '@/components/shared/Header';
-import { useAuth } from '@/context/AuthContext';
-import { useCatalogs } from '@/hooks/useCatalogs';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import CatalogCard from '@/components/ui/CatalogCard';
-import { FolderPlus, X, MoreVertical } from 'lucide-react-native';
-import GlassmorphicCard from '@/components/ui/GlassmorphicCard';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { supabase } from '@/lib/supabase';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  FlatList,
+  Modal,
+  TouchableOpacity,
+  RefreshControl,
+  Alert,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { COLORS, SPACING, SHADOWS } from "@/constants/theme";
+import Header from "@/components/shared/Header";
+import { useAuth } from "@/context/AuthContext";
+import { useCatalogs } from "@/hooks/useCatalogs";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import CatalogCard from "@/components/ui/CatalogCard";
+import { FolderPlus, X, MoreVertical } from "lucide-react-native";
+import GlassmorphicCard from "@/components/ui/GlassmorphicCard";
+import Animated, { FadeIn } from "react-native-reanimated";
+import { supabase } from "@/lib/supabase";
+import UnAuthenticatedScreen from "@/components/ui/UnauthenticatedScreen";
 
 type Catalog = {
   id: string;
@@ -22,20 +32,20 @@ type Catalog = {
 export default function CatalogsScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const [newCatalogName, setNewCatalogName] = useState('');
+  const [newCatalogName, setNewCatalogName] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isRenameModalVisible, setIsRenameModalVisible] = useState(false);
   const [selectedCatalog, setSelectedCatalog] = useState<Catalog | null>(null);
-  const [renameCatalogName, setRenameCatalogName] = useState('');
-  const { 
-    catalogs, 
-    loading, 
-    error, 
-    refreshing, 
+  const [renameCatalogName, setRenameCatalogName] = useState("");
+  const {
+    catalogs,
+    loading,
+    error,
+    refreshing,
     onRefresh,
     createCatalog,
     updateCatalog,
-    refetchCatalogs
+    refetchCatalogs,
   } = useCatalogs();
 
   const handlePresentModalPress = () => {
@@ -44,7 +54,7 @@ export default function CatalogsScreen() {
 
   const handleDismissModal = () => {
     setIsModalVisible(false);
-    setNewCatalogName('');
+    setNewCatalogName("");
   };
 
   const handleCreateCatalog = async () => {
@@ -55,7 +65,7 @@ export default function CatalogsScreen() {
       if (error) throw error;
       handleDismissModal();
     } catch (error) {
-      console.error('Error creating catalog:', error);
+      console.error("Error creating catalog:", error);
     }
   };
 
@@ -71,26 +81,26 @@ export default function CatalogsScreen() {
 
   const handleDeletePress = (catalog: Catalog) => {
     Alert.alert(
-      'Delete Catalog',
-      'Are you sure you want to delete this catalog? This will also remove all product associations.',
+      "Delete Catalog",
+      "Are you sure you want to delete this catalog? This will also remove all product associations.",
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Delete',
-          style: 'destructive',
+          text: "Delete",
+          style: "destructive",
           onPress: async () => {
             try {
               const { error } = await supabase
-                .from('catalogs')
+                .from("catalogs")
                 .delete()
-                .eq('id', catalog.id);
+                .eq("id", catalog.id);
 
               if (error) throw error;
 
               await refetchCatalogs();
-              Alert.alert('Success', 'Catalog deleted successfully');
+              Alert.alert("Success", "Catalog deleted successfully");
             } catch (error: any) {
-              Alert.alert('Error', error.message);
+              Alert.alert("Error", error.message);
             }
           },
         },
@@ -101,22 +111,31 @@ export default function CatalogsScreen() {
   const handleDismissRenameModal = () => {
     setIsRenameModalVisible(false);
     setSelectedCatalog(null);
-    setRenameCatalogName('');
+    setRenameCatalogName("");
   };
 
   const handleRenameCatalog = async () => {
     if (!selectedCatalog || !renameCatalogName.trim()) return;
 
     try {
-      const { error } = await updateCatalog(selectedCatalog.id, renameCatalogName.trim());
+      const { error } = await updateCatalog(
+        selectedCatalog.id,
+        renameCatalogName.trim()
+      );
       if (error) throw error;
       handleDismissRenameModal();
     } catch (error) {
-      console.error('Error renaming catalog:', error);
+      console.error("Error renaming catalog:", error);
     }
   };
 
-  const renderCatalogItem = ({ item, index }: { item: Catalog; index: number }) => (
+  const renderCatalogItem = ({
+    item,
+    index,
+  }: {
+    item: Catalog;
+    index: number;
+  }) => (
     <CatalogCard
       id={item.id}
       name={item.name}
@@ -132,9 +151,7 @@ export default function CatalogsScreen() {
     return (
       <View style={styles.container}>
         <Header title="My Catalogs" />
-        <View style={styles.centerContent}>
-          <Text style={styles.loginMessage}>Please sign in to view your catalogs</Text>
-        </View>
+        <UnAuthenticatedScreen />
       </View>
     );
   }
@@ -142,11 +159,11 @@ export default function CatalogsScreen() {
   return (
     <View style={styles.container}>
       <Header title="My Catalogs" />
-      
+
       <FlatList
         data={catalogs}
         renderItem={renderCatalogItem}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.catalogList}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -168,7 +185,7 @@ export default function CatalogsScreen() {
         }
       />
 
-      <Animated.View 
+      <Animated.View
         entering={FadeIn.delay(200).springify()}
         style={styles.fabContainer}
       >
@@ -195,11 +212,11 @@ export default function CatalogsScreen() {
                 <X size={24} color={COLORS.textPrimary} />
               </TouchableOpacity>
             </View>
-            
+
             <Text style={styles.modalDescription}>
               Create a new collection to organize your favorite items
             </Text>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Catalog Name</Text>
               <Input
@@ -215,10 +232,7 @@ export default function CatalogsScreen() {
                 variant="outline"
                 onPress={handleDismissModal}
               />
-              <Button
-                title="Create Catalog"
-                onPress={handleCreateCatalog}
-              />
+              <Button title="Create Catalog" onPress={handleCreateCatalog} />
             </View>
           </View>
         </View>
@@ -238,11 +252,11 @@ export default function CatalogsScreen() {
                 <X size={24} color={COLORS.textPrimary} />
               </TouchableOpacity>
             </View>
-            
+
             <Text style={styles.modalDescription}>
               Enter a new name for your catalog
             </Text>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Catalog Name</Text>
               <Input
@@ -258,10 +272,7 @@ export default function CatalogsScreen() {
                 variant="outline"
                 onPress={handleDismissRenameModal}
               />
-              <Button
-                title="Rename"
-                onPress={handleRenameCatalog}
-              />
+              <Button title="Rename" onPress={handleRenameCatalog} />
             </View>
           </View>
         </View>
@@ -273,16 +284,15 @@ export default function CatalogsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
-    marginBottom:70,
+    backgroundColor: "#f6f5ed",
   },
   catalogList: {
     padding: SPACING.lg,
     paddingBottom: SPACING.xxl,
   },
   catalogItemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: SPACING.md,
   },
   moreButton: {
@@ -290,38 +300,38 @@ const styles = StyleSheet.create({
     marginLeft: SPACING.sm,
   },
   emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: SPACING.xxl,
   },
   emptyText: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: "Poppins-Medium",
     fontSize: 18,
     color: COLORS.textPrimary,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: SPACING.sm,
   },
   emptySubText: {
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
     fontSize: 14,
     color: COLORS.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
   },
   centerContent: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: SPACING.xl,
   },
   loginMessage: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: "Poppins-Medium",
     fontSize: 18,
     color: COLORS.textPrimary,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: SPACING.xl,
   },
   fabContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: SPACING.xl,
     right: SPACING.xl,
     zIndex: 10,
@@ -331,36 +341,36 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 28,
     backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     ...SHADOWS.large,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
     backgroundColor: COLORS.background,
     borderRadius: 16,
     padding: SPACING.lg,
-    width: '90%',
+    width: "90%",
     maxWidth: 400,
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: SPACING.md,
   },
   modalTitle: {
-    fontFamily: 'Poppins-Bold',
+    fontFamily: "Poppins-Bold",
     fontSize: 20,
     color: COLORS.textPrimary,
   },
   modalDescription: {
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
     fontSize: 14,
     color: COLORS.textSecondary,
     marginBottom: SPACING.xl,
@@ -369,14 +379,14 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,
   },
   inputLabel: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: "Poppins-Medium",
     fontSize: 14,
     color: COLORS.textPrimary,
     marginBottom: SPACING.xs,
   },
   modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     gap: SPACING.md,
   },
 });

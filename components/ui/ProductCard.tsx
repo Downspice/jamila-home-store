@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   },
   name: {
     color: COLORS.black,
-    fontFamily: "Poppins-SemiBold",
+    fontFamily: "Poppins-small",
     fontSize: 14,
     flex: 1,
     marginRight: 8,

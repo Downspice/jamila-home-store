@@ -46,8 +46,10 @@ export default function DeleteAccountScreen() {
 
   const WarningSection = () => (
     <View style={styles.warningContainer}>
+      <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
       <AlertTriangle size={24} color={COLORS.danger} style={styles.warningIcon} />
       <Text style={styles.warningTitle}>Warning: Account Deletion</Text>
+      </View>
       <Text style={styles.warningText}>
         This action cannot be undone. All your data will be permanently deleted,
         including:
@@ -65,8 +67,7 @@ export default function DeleteAccountScreen() {
     <View style={styles.container}>
       <Header title="Delete Account" showBackButton />
       
-      <ScrollView style={styles.content}>
-        <GlassmorphicCard style={styles.card}>
+      <ScrollView style={styles.content}> 
           <WarningSection />
 
           {!showConfirmation ? (
@@ -113,8 +114,7 @@ export default function DeleteAccountScreen() {
                 </TouchableOpacity>
               </View>
             </>
-          )}
-        </GlassmorphicCard>
+          )} 
       </ScrollView>
     </View>
   );
@@ -143,13 +143,14 @@ const styles = StyleSheet.create({
   },
   warningTitle: {
     fontFamily: 'Poppins-Bold',
-    fontSize: 18,
+    fontSize: 16,
     color: COLORS.danger,
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.xs,
   },
   warningText: {
     fontFamily: 'Poppins-Regular',
-    fontSize: 16,
+    fontSize: 14,
+    lineHeight: 20,
     color: COLORS.textPrimary,
     marginBottom: SPACING.md,
   },
@@ -158,7 +159,8 @@ const styles = StyleSheet.create({
   },
   warningItem: {
     fontFamily: 'Poppins-Regular',
-    fontSize: 14,
+    fontSize: 13,
+    lineHeight: 18,
     color: COLORS.textPrimary,
     marginBottom: SPACING.xs,
   },
@@ -169,20 +171,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
+    marginTop: SPACING.lg,
   },
   confirmationText: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: 16,
+    fontFamily: 'Poppins-Medium',
+    fontSize: 14,
+    lineHeight: 20,
     color: COLORS.textPrimary,
     marginBottom: SPACING.md,
     textAlign: 'center',
   },
   input: {
     fontFamily: 'Poppins-Regular',
-    fontSize: 16,
+    fontSize: 14,
     color: COLORS.textPrimary,
     backgroundColor: COLORS.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     padding: SPACING.md,
     marginBottom: SPACING.lg,
     borderWidth: 1,
@@ -214,7 +218,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontFamily: 'Poppins-Medium',
-    fontSize: 16,
+    fontSize: 14,
     color: COLORS.white,
   },
-}); 
+});
+

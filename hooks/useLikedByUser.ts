@@ -2,23 +2,16 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 
-export type Profile = {
-  id: string;
-  full_name: string;
-  avatar_url: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-export const useProfile = () => {
+export const useLikedByUser = (productId: string) => {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [likedByUserProducts, setLikedByUserProducts] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchProfile = async () => {
+  const fetchLikedByUserProducts = async () => {
     if (!user) {
+      setLikedByUserProducts([]);
       setLoading(false);
       return;
     }
@@ -28,19 +21,19 @@ export const useProfile = () => {
     
     try {
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+        .from('user_likes')
+        .select('product_id')
+        .eq('user_id', user.id) 
 
-        console.log('Profile Data:', data); 
       if (error) {
         throw error;
       }
 
-      setProfile(data);
+      if (data) {
+        setLikedByUserProducts(data.map(like => like.product_id));
+      }
     } catch (error: any) {
-      console.error('Error fetching profile:', error);
+      console.error('Error fetching liked products:', error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -49,20 +42,19 @@ export const useProfile = () => {
   };
 
   useEffect(() => {
-    fetchProfile();
+    fetchLikedByUserProducts();
   }, [user]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    fetchProfile();
-  }, []);
+    fetchLikedByUserProducts();
+  }, [user]);
 
-  return { 
-    profile, 
-    loading, 
-    error, 
-    refreshing,
-    onRefresh,
-    refetch: fetchProfile
+ 
+
+  const isLikedByUser = (productId: string) => {
+    return likedByUserProducts.includes(productId);
   };
-}; 
+
+  return { likedByUserProducts, loading, error, isLikedByUser, refreshing, onRefresh };
+};

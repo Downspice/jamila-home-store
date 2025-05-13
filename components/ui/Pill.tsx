@@ -32,7 +32,7 @@ const Pill = ({
 
 const styles = StyleSheet.create({
   pill: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 999,
     borderWidth: 1,

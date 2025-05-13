@@ -1,45 +1,39 @@
-import React, { useState } from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  ScrollView, 
-  TouchableOpacity, 
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
   Image,
   RefreshControl,
-  TextInput 
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { COLORS, SPACING } from '@/constants/theme';
-import { useSearch } from '@/hooks/useSearch';
-import Header from '@/components/shared/Header';
-import GlassmorphicCard from '@/components/ui/GlassmorphicCard';
-import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Search, X } from 'lucide-react-native';
+  TextInput,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { COLORS, SPACING } from "@/constants/theme";
+import { useSearch } from "@/hooks/useSearch";
+import Header from "@/components/shared/Header";
+import GlassmorphicCard from "@/components/ui/GlassmorphicCard";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import { Search, X } from "lucide-react-native";
 
 export default function SearchScreen() {
   const router = useRouter();
-  const [query, setQuery] = useState('');
-  const { 
-    results, 
-    loading, 
-    error, 
-    refreshing, 
-    onRefresh 
-  } = useSearch(query);
+  const [query, setQuery] = useState("");
+  const { results, loading, error, refreshing, onRefresh } = useSearch(query);
 
   const handleProductPress = (productId: string) => {
     router.push(`/product/${productId}`);
   };
 
   const clearSearch = () => {
-    setQuery('');
+    setQuery("");
   };
 
   return (
     <View style={styles.container}>
       <Header title="Search" />
-      
+
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
           <Search size={20} color={COLORS.textSecondary} />
@@ -75,12 +69,10 @@ export default function SearchScreen() {
               key={product.id}
               entering={FadeInDown.delay(index * 100).springify()}
             >
-              <TouchableOpacity
-                onPress={() => handleProductPress(product.id)}
-              >
+              <TouchableOpacity onPress={() => handleProductPress(product.id)}>
                 <GlassmorphicCard style={styles.card}>
                   <Image
-                    source={{ uri: product.images[0] || '' }}
+                    source={{ uri: product.images[0] || "" }}
                     style={styles.image}
                   />
                   <Text style={styles.name}>{product.name}</Text>
@@ -97,14 +89,14 @@ export default function SearchScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.screenBackground,
   },
   searchContainer: {
     padding: SPACING.lg,
   },
   searchInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: COLORS.white,
     borderRadius: SPACING.sm,
     paddingHorizontal: SPACING.md,
@@ -113,7 +105,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     marginLeft: SPACING.sm,
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
     fontSize: 16,
     color: COLORS.textPrimary,
   },
@@ -122,23 +114,23 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
   },
   grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
   card: {
     flex: 1,
     margin: SPACING.xs,
     height: 150,
-    maxWidth: '50%',
+    maxWidth: "50%",
   },
   image: {
     flex: 1,
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     borderRadius: SPACING.sm,
   },
   name: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: "Poppins-Medium",
     fontSize: 16,
     color: COLORS.textPrimary,
     marginTop: SPACING.sm,

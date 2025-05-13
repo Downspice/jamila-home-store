@@ -40,6 +40,7 @@ export default function Header({
 }: HeaderProps) {
   const router = useRouter();
   const { profile } = useAuth();
+  const ProfilePress=()=>router.push("/profile");
   const avatar = profile?.avatar_url;
 
   const handleBackPress = () => {
@@ -72,7 +73,7 @@ export default function Header({
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <BlurView intensity={80} tint="light" style={styles.blurButton}>
-              <ArrowLeft size={22} color={COLORS.white} />
+              <ArrowLeft size={22} color={COLORS.white}/>
             </BlurView>
           </TouchableOpacity>
         )}
@@ -97,7 +98,7 @@ export default function Header({
 
           {showProfile && (
             <TouchableOpacity
-              onPress={onProfilePress}
+              onPress={ProfilePress}
               style={[styles.iconButton, showSearch && styles.leftMargin]}
               activeOpacity={0.7}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -140,12 +141,12 @@ export default function Header({
             <ArrowLeft size={22} color={COLORS.textPrimary} />
           </TouchableOpacity>
         ) : (
-          <Text style={{ width: 30, height: 30 }}>
+          <View style={{ width: 30, height: 30 }}>
             <Image
               source={require("@/assets/images/inapp-logo.png")}
               style={{ width: 22, height: 22 }}
             />
-          </Text>
+          </View>
         )}
 
         {title && <Text style={styles.title}>{title}</Text>}
@@ -176,7 +177,7 @@ export default function Header({
 
           {showProfile && (
             <TouchableOpacity
-              onPress={onProfilePress}
+              onPress={ProfilePress}
               style={[styles.iconButton, showSearch && styles.leftMargin]}
               activeOpacity={0.7}
               hitSlop={{ top: 2, bottom: 2, left: 5, right: 5 }}
@@ -251,7 +252,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   iconButton: {
-    padding: SPACING.xs,
+    // padding: SPACING.xs,
   },
   leftMargin: {
     marginLeft: SPACING.md,
@@ -263,7 +264,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
-    borderWidth: 0.5,
+    // borderWidth: 0.5,
     borderColor: COLORS.white20,
   },
   searchBar: {

@@ -2,7 +2,7 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { Heart, Share2, PhoneCall } from 'lucide-react-native';
+import { Heart, Share2, PhoneCall, ArrowBigLeft, ArrowLeft } from 'lucide-react-native';
 
 interface ProductHeaderProps {
   onBackPress: () => void;
@@ -14,15 +14,15 @@ const ProductHeader = ({ onBackPress, onLikePress, onSharePress }: ProductHeader
   return (
     <View style={styles.container}>
       <BlurIconButton onPress={onBackPress}>
-        <PhoneCall size={18} color="#fff" strokeWidth={2} />
+        <ArrowLeft size={20} color="#000000" strokeWidth={2} />
       </BlurIconButton>
 
       <View style={styles.rightButtons}>
         <BlurIconButton onPress={onSharePress}>
-          <Share2 size={18} color="#fff" strokeWidth={2} />
+          <Share2 size={20} color="#000000" strokeWidth={2} />
         </BlurIconButton>
         <BlurIconButton onPress={onLikePress}>
-          <Heart size={18} color="#fff" strokeWidth={2} />
+          <Heart size={20} color="#000000" strokeWidth={2} />
         </BlurIconButton>
       </View>
     </View>
@@ -36,15 +36,15 @@ const BlurIconButton = ({
   children: React.ReactNode;
   onPress: () => void;
 }) => (
-  <TouchableOpacity onPress={onPress} activeOpacity={0.85} style={styles.touchable}>
-    <BlurView
+  <TouchableOpacity onPress={onPress} activeOpacity={0.99} style={styles.touchable}>
+    {/* <BlurView
       style={styles.blurContainer}
       blurType="light"
-      blurAmount={25}
-      reducedTransparencyFallbackColor="rgba(255,255,255,0.2)"
-    >
+      blurAmount={70}
+      reducedTransparencyFallbackColor="rgba(255, 255, 255, 0.65)"
+    > */}
       {children}
-    </BlurView>
+    {/* </BlurView> */}
   </TouchableOpacity>
 );
 
@@ -67,11 +67,15 @@ const styles = StyleSheet.create({
   touchable: {
     borderRadius: 100,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    padding: 10, 
+    backgroundColor: 'rgb(255, 255, 255)', 
   },
   blurContainer: {
     padding: 10,
     borderRadius: 100,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgb(255, 255, 255)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',

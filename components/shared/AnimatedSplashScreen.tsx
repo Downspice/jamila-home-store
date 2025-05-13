@@ -1,15 +1,14 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Text,Image } from 'react-native';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withTiming, 
+import { View, StyleSheet, Image } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
   withDelay,
-  Easing, 
+  Easing,
   withSequence,
   runOnJS
 } from 'react-native-reanimated';
-import { COLORS } from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface AnimatedSplashScreenProps {
@@ -20,40 +19,24 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
   const containerOpacity = useSharedValue(1);
   const logoScale = useSharedValue(0);
   const logoOpacity = useSharedValue(0);
-  const textPosition = useSharedValue(20);
-  const textOpacity = useSharedValue(0);
 
   useEffect(() => {
-    // Animate logo scale
+    // Logo scale and opacity animation
     logoScale.value = withSequence(
       withTiming(0, { duration: 0 }),
-      withTiming(1.2, { 
-        duration: 700, 
-        easing: Easing.out(Easing.cubic) 
+      withTiming(1.2, {
+        duration: 700,
+        easing: Easing.out(Easing.cubic)
       }),
-      withTiming(1, { 
-        duration: 300, 
-        easing: Easing.inOut(Easing.cubic) 
+      withTiming(1, {
+        duration: 300,
+        easing: Easing.inOut(Easing.cubic)
       })
     );
 
-    // Animate logo opacity
     logoOpacity.value = withTiming(1, { duration: 800 });
 
-    // Animate text
-    textPosition.value = withDelay(
-      500, 
-      withTiming(0, { 
-        duration: 600, 
-        easing: Easing.out(Easing.cubic) 
-      })
-    );
-    textOpacity.value = withDelay(
-      500, 
-      withTiming(1, { duration: 800 })
-    );
-
-    // Fade out the entire splash screen
+    // Fade out the splash screen
     const timeout = setTimeout(() => {
       containerOpacity.value = withTiming(0, {
         duration: 800,
@@ -66,34 +49,25 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
     return () => clearTimeout(timeout);
   }, []);
 
-  const containerAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: containerOpacity.value,
-    };
-  });
+  const containerAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: containerOpacity.value,
+  }));
 
-  const logoAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: logoScale.value }],
-      opacity: logoOpacity.value,
-    };
-  });
-
-  const textAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: textOpacity.value,
-      transform: [{ translateY: textPosition.value }],
-    };
-  });
+  const logoAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: logoScale.value }],
+    opacity: logoOpacity.value,
+  }));
 
   return (
     <Animated.View style={[styles.container, containerAnimatedStyle]}>
       <LinearGradient
-        colors={['#000000', '#000000']}
+        colors={['#1A120B', '#000000']} // Deep espresso to black
+        start={{ x: 0.1, y: 0.1 }}
+        end={{ x: 1, y: 1 }}
         style={styles.gradient}
       >
         <View style={styles.content}>
-          <Animated.View style={[ logoAnimatedStyle]}> 
+          <Animated.View style={logoAnimatedStyle}>
             <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
           </Animated.View>
         </View>
@@ -119,13 +93,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    width: 300,
-    height: 300,
-  },
-  title: {
-    fontFamily: 'Playfair-Bold',
-    fontSize: 32,
-    color: COLORS.white,
-    letterSpacing: 1,
+    width: 260,
+    height: 260,
+    resizeMode: 'contain',
   },
 });

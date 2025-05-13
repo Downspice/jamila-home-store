@@ -35,10 +35,7 @@ export default function PrivacyScreen() {
       'Log Out',
       'Are you sure you want to log out?',
       [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
+        { text: 'Cancel', style: 'cancel' },
         {
           text: 'Log Out',
           style: 'destructive',
@@ -52,15 +49,15 @@ export default function PrivacyScreen() {
     );
   };
 
-  const SettingItem = ({ 
-    icon, 
-    title, 
-    description, 
-    value, 
+  const SettingItem = ({
+    icon,
+    title,
+    description,
+    value,
     onToggle,
     showSwitch = true,
     onPress,
-    isDanger = false
+    isDanger = false,
   }: {
     icon: React.ReactNode;
     title: string;
@@ -71,12 +68,12 @@ export default function PrivacyScreen() {
     onPress?: () => void;
     isDanger?: boolean;
   }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.settingItem}
       onPress={onPress}
-      activeOpacity={0.7}
+      activeOpacity={onPress ? 0.7 : 1}
     >
-      <View style={[styles.settingIcon, isDanger && styles.dangerIcon]}>
+      <View style={[styles.iconContainer, isDanger && styles.dangerIcon]}>
         {icon}
       </View>
       <View style={styles.settingContent}>
@@ -99,39 +96,39 @@ export default function PrivacyScreen() {
   return (
     <View style={styles.container}>
       <Header title="Privacy & Security" showBackButton />
-      
-      <ScrollView style={styles.content}>
-        <GlassmorphicCard style={styles.card}>
-          <Text style={styles.sectionTitle}>Privacy Settings</Text>
+
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* <GlassmorphicCard style={styles.card}>
+          <Text style={styles.sectionTitle}>Privacy</Text>
           <SettingItem
-            icon={<Eye size={24} color={COLORS.primary} />}
+            icon={<Eye size={20} color={COLORS.primary} />}
             title="Show Profile"
-            description="Make your profile visible to other users"
+            description="Allow others to see your profile"
             value={settings.showProfile}
             onToggle={() => toggleSetting('showProfile')}
           />
           <SettingItem
-            icon={<Shield size={24} color={COLORS.primary} />}
+            icon={<Shield size={20} color={COLORS.primary} />}
             title="Show Activity"
-            description="Display your activity and interactions"
+            description="Share your activity publicly"
             value={settings.showActivity}
             onToggle={() => toggleSetting('showActivity')}
           />
-        </GlassmorphicCard>
+        </GlassmorphicCard> */}
 
         <GlassmorphicCard style={styles.card}>
           <Text style={styles.sectionTitle}>Security</Text>
-          <SettingItem
-            icon={<Key size={24} color={COLORS.primary} />}
+          {/* <SettingItem
+            icon={<Key size={20} color={COLORS.primary} />}
             title="Two-Factor Authentication"
-            description="Add an extra layer of security to your account"
+            description="Enable extra security during login"
             value={settings.twoFactorAuth}
             onToggle={() => toggleSetting('twoFactorAuth')}
-          />
+          /> */}
           <SettingItem
-            icon={<Lock size={24} color={COLORS.primary} />}
+            icon={<Lock size={20} color={COLORS.primary} />}
             title="Change Password"
-            description="Update your account password"
+            description="Update your current password"
             showSwitch={false}
             onPress={() => router.push('/profile/change-password')}
           />
@@ -140,19 +137,19 @@ export default function PrivacyScreen() {
         <GlassmorphicCard style={styles.card}>
           <Text style={styles.sectionTitle}>Account</Text>
           <SettingItem
-            icon={<LogOut size={24} color={COLORS.primary} />}
+            icon={<LogOut size={20} color={COLORS.primary} />}
             title="Log Out"
-            description="Sign out of your account"
+            description="Sign out from this device"
             showSwitch={false}
             onPress={handleLogout}
           />
           <SettingItem
-            icon={<Trash2 size={24} color={COLORS.danger} />}
+            icon={<Trash2 size={20} color={COLORS.danger} />}
             title="Delete Account"
-            description="Permanently delete your account and all data"
+            description="Permanently delete your data"
             showSwitch={false}
             onPress={() => router.push('/profile/delete-account')}
-            isDanger={true}
+            isDanger
           />
         </GlassmorphicCard>
       </ScrollView>
@@ -165,54 +162,60 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  content: {
-    flex: 1,
+  scrollContent: {
     padding: SPACING.lg,
+    paddingBottom: 60,
   },
   card: {
     padding: SPACING.lg,
     marginBottom: SPACING.lg,
+    borderRadius: 16,
+    shadowColor: COLORS.border,
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
   },
   sectionTitle: {
-    fontFamily: 'Poppins-Bold',
-    fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: 16,
     color: COLORS.textPrimary,
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.md,
+    opacity: 0.9,
   },
   settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: COLORS.border + '33',
   },
-  settingIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.primary + '20',
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: COLORS.primary + '22',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.md,
   },
   dangerIcon: {
-    backgroundColor: COLORS.danger + '20',
+    backgroundColor: COLORS.danger + '22',
   },
   settingContent: {
     flex: 1,
   },
   settingTitle: {
     fontFamily: 'Poppins-Medium',
-    fontSize: 16,
+    fontSize: 15,
     color: COLORS.textPrimary,
-    marginBottom: SPACING.xs,
+    marginBottom: 2,
+  },
+  settingDescription: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    opacity: 0.8,
   },
   dangerText: {
     color: COLORS.danger,
   },
-  settingDescription: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: 14,
-    color: COLORS.textSecondary,
-  },
-}); 
+});

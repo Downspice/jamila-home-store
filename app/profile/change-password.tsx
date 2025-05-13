@@ -91,8 +91,7 @@ export default function ChangePasswordScreen() {
     <View style={styles.container}>
       <Header title="Change Password" showBackButton />
       
-      <View style={styles.content}>
-        <GlassmorphicCard style={styles.card}>
+      <View style={styles.content}> 
           <Text style={styles.title}>Update Your Password</Text>
           <Text style={styles.description}>
             Enter your current password and choose a new one
@@ -130,8 +129,7 @@ export default function ChangePasswordScreen() {
             <Text style={styles.buttonText}>
               {loading ? 'Updating...' : 'Update Password'}
             </Text>
-          </TouchableOpacity>
-        </GlassmorphicCard>
+          </TouchableOpacity> 
       </View>
     </View>
   );
@@ -148,37 +146,39 @@ const styles = StyleSheet.create({
   },
   card: {
     padding: SPACING.lg,
+    borderRadius: 20,
   },
   title: {
     fontFamily: 'Poppins-Bold',
-    fontSize: 24,
+    fontSize: 18,
     color: COLORS.textPrimary,
     marginBottom: SPACING.xs,
   },
   description: {
     fontFamily: 'Poppins-Regular',
-    fontSize: 16,
+    fontSize: 14,
     color: COLORS.textSecondary,
-    marginBottom: SPACING.xl,
+    marginBottom: SPACING.lg,
+    lineHeight: 20,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.surface,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: SPACING.md,
     marginBottom: SPACING.md,
     borderWidth: 1,
     borderColor: COLORS.border,
+    height: 48,
   },
   inputIcon: {
     marginRight: SPACING.sm,
   },
   input: {
     flex: 1,
-    height: 50,
     fontFamily: 'Poppins-Regular',
-    fontSize: 16,
+    fontSize: 14,
     color: COLORS.textPrimary,
   },
   eyeIcon: {
@@ -186,17 +186,18 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: COLORS.primary,
-    borderRadius: 12,
-    padding: SPACING.md,
+    borderRadius: 14,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
     alignItems: 'center',
-    marginTop: SPACING.md,
+    marginTop: SPACING.lg,
   },
   buttonDisabled: {
-    opacity: 0.7,
+    opacity: 0.6,
   },
   buttonText: {
     fontFamily: 'Poppins-Medium',
-    fontSize: 16,
+    fontSize: 14,
     color: COLORS.white,
   },
-}); 
+});
