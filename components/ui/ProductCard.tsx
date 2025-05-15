@@ -15,6 +15,7 @@ interface ProductCardProps {
   onLike?: () => void;
   style?: any;
   index?: number;
+  disabled?: boolean;
 }
 
 export default function ProductCard({
@@ -27,12 +28,27 @@ export default function ProductCard({
   onLike,
   style,
   index = 0,
+  disabled,
 }: ProductCardProps) {
   const imageUrl =
     images?.length > 0
       ? images[0]
       : "https://images.pexels.com/photos/1350789/pexels-photo-1350789.jpeg";
 
+  const [isProcessing, setIsProcessing] = React.useState(disabled);
+
+  const handleLike = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    try {
+      await onLike?.(); // Call the like logic passed from parent
+    } catch (err) {
+      console.error("Like error:", err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
   return (
     <Animated.View
       entering={FadeInRight.delay(index * 100).springify()}
@@ -50,10 +66,11 @@ export default function ProductCard({
           transition={300}
         />
 
-        <TouchableOpacity onPress={onLike} style={styles.heart}>
+        <TouchableOpacity onPress={handleLike} style={styles.heart}>
           <Heart
             size={20}
             color={isLiked ? COLORS.error : COLORS.white}
+            // color={disabled ? COLORS.error : ''}
             fill={isLiked ? COLORS.error : "transparent"}
           />
         </TouchableOpacity>
@@ -83,7 +100,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: "hidden",
     backgroundColor: COLORS.white,
-    ...SHADOWS.medium,
+     
   },
   touchable: {
     width: "100%",

@@ -43,12 +43,12 @@ const AboutScreen = () => {
           <Text style={styles.sectionTitle}>Support</Text>
           <SupportItem
             Icon={Phone}
-            text="0577210669"
-            onPress={() => Linking.openURL("tel:0577210669")}
+            text="233 302 437 227"
+            onPress={() => Linking.openURL("tel:233302437227")}
           />
           <SupportItem
             Icon={Mail}
-            text="joseph.awer@gmail.com"
+            text="info@jamilahome.com"
             onPress={() => Linking.openURL("mailto:joseph.awer@gmail.com")}
           />
           <SupportItem

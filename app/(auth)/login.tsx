@@ -1,24 +1,32 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { Link, useRouter } from 'expo-router';
-import { COLORS, SPACING } from '@/constants/theme';
-import { useAuth } from '@/context/AuthContext';
-import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { COLORS, SPACING } from "@/constants/theme";
+import { useAuth } from "@/context/AuthContext";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const { signIn } = useAuth();
   const router = useRouter();
 
   const handleLogin = async () => {
     if (!email || !password) {
-      setError('Please enter both email and password');
+      setError("Please enter both email and password");
       return;
     }
 
@@ -27,42 +35,44 @@ export default function LoginScreen() {
 
     try {
       const result = await signIn(email, password);
-      
+
       if (result?.error) {
         setError(result.error.message);
       } else {
-        router.replace('/(tabs)');
+        router.replace("/(tabs)");
       }
     } catch (error: any) {
-      setError(error.message || 'Failed to sign in');
+      setError(error.message || "Failed to sign in");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <LinearGradient
-      colors={COLORS.gradientPrimary}
-      style={styles.gradient}
-    >
+    <View style={styles.background}>
+      <View style={styles.diagonalOverlay} />
+
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.headerContainer}>
-            <Text style={styles.logo}>J</Text>
+          <View style={styles.header}>
+            <Image
+              source={require("@/assets/images/logo.png")}
+              style={styles.logo}
+            />
             <Text style={styles.title}>Jamila Home</Text>
             <Text style={styles.subtitle}>Elegant Furniture for Your Home</Text>
           </View>
 
-          <View style={styles.formContainer}>
+          <View style={styles.formCard}>
             {error && (
-              <View style={styles.errorContainer}>
+              <View style={styles.errorBox}>
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             )}
@@ -86,101 +96,129 @@ export default function LoginScreen() {
 
             <Button
               title="Sign In"
-              variant='secondary'
+              variant="secondary"
               onPress={handleLogin}
               loading={loading}
               style={styles.loginButton}
               fullWidth
             />
 
-            <View style={styles.footerContainer}>
-              <Text style={styles.footerText}>Don't have an account?</Text>
-              <Link href="/signup" asChild>
-                <TouchableOpacity>
-                  <Text style={styles.signupLink}>Sign Up</Text>
-                </TouchableOpacity>
-              </Link>
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>
+                Don't have an account?
+                <Text
+                  style={styles.linkText}
+                  onPress={() => router.push("/signup")}
+                >
+                  {" "}
+                  Sign Up
+                </Text>
+              </Text>
+
+              <Text style={styles.footerText}>
+                <Text
+                  style={styles.linkText}
+                  onPress={() => router.push("/")}
+                >
+                  I’ll sign in later
+                </Text>
+              </Text>
             </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  gradient: {
+  background: {
     flex: 1,
+    backgroundColor: COLORS.screenBackground,
+  },
+  diagonalOverlay: {
+    position: "absolute",
+    top: -250,
+    left: -100,
+    width: "250%",
+    height: "250%",
+    backgroundColor: COLORS.white,
+    transform: [{ rotate: "-25deg" }],
+    zIndex: -1,
+    borderRadius: 100,
   },
   container: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: SPACING.xl,
-    paddingTop: 100,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: 80,
     paddingBottom: SPACING.xxl,
   },
-  headerContainer: {
-    alignItems: 'center',
-    marginBottom: SPACING.xxl,
+  header: {
+    alignItems: "center",
+    marginBottom: SPACING.xl,
   },
   logo: {
-    fontFamily: 'Playfair-Bold',
-    fontSize: 64,
-    color: COLORS.white,
-    textAlign: 'center',
+    width: 160,
+    height: 160,
     marginBottom: SPACING.sm,
   },
   title: {
-    fontFamily: 'Playfair-Bold',
-    fontSize: 32,
-    color: COLORS.white,
-    textAlign: 'center',
-    marginBottom: SPACING.sm,
+    fontFamily: "Playfair-Bold",
+    fontSize: 34,
+    color: COLORS.primary,
+    textAlign: "center",
   },
   subtitle: {
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
     fontSize: 16,
-    color: COLORS.white80,
-    textAlign: 'center',
+    color: COLORS.textSecondary,
+    textAlign: "center",
   },
-  formContainer: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
+  formCard: {
+    backgroundColor: COLORS.white + "CC",
+    borderRadius: 20,
     padding: SPACING.xl,
-    width: '100%',
+    width: "100%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+    backdropFilter: "blur(10px)",
   },
-  errorContainer: {
-    backgroundColor: COLORS.error + '20',
+  errorBox: {
+    backgroundColor: COLORS.error + "15",
     borderRadius: 8,
     padding: SPACING.md,
     marginBottom: SPACING.md,
   },
   errorText: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: "Poppins-Medium",
     fontSize: 14,
     color: COLORS.error,
-    textAlign: 'center',
+    textAlign: "center",
   },
   loginButton: {
-    // marginTop: SPACING.md,
+    marginTop: SPACING.md,
   },
-  footerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+  footer: {
     marginTop: SPACING.xl,
+    alignItems: "center",
+    gap: 10,
   },
   footerText: {
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
     fontSize: 14,
     color: COLORS.textSecondary,
+    textAlign: "center",
   },
-  signupLink: {
-    fontFamily: 'Poppins-SemiBold',
+  linkText: {
+    fontFamily: "Poppins-SemiBold",
     fontSize: 14,
     color: COLORS.primary,
-    marginLeft: SPACING.xs,
+    textDecorationLine: "underline",
   },
 });

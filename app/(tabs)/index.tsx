@@ -8,6 +8,7 @@ import {
   FlatList,
   RefreshControl,
   useWindowDimensions,
+  ImageBackground,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
@@ -35,12 +36,12 @@ export default function HomeScreen() {
     onRefresh,
   } = useProducts();
   const { categories, loading: categoriesLoading } = useCategories();
-  const { toggleLike, isLiked } = useLikes();
+  const { isLiked, getLikeCount, toggleLike, isProcessing } = useLikes();
 
   // Preload and cache images
   useEffect(() => {
     if (products) {
-      products.forEach(product => {
+      products.forEach((product) => {
         if (product.images && product.images.length > 0) {
           const imageUrl = product.images[0];
           if (!imageCache.has(imageUrl)) {
@@ -71,8 +72,12 @@ export default function HomeScreen() {
   const cardSpacing = SPACING.md;
   const horizontalPadding = SPACING.lg * 2;
   const availableWidth = screenWidth - horizontalPadding;
-  const numColumns = Math.max(2, Math.floor(availableWidth / (minCardWidth + cardSpacing)));
-  const cardWidth = (availableWidth - cardSpacing * (numColumns - 1)) / numColumns;
+  const numColumns = Math.max(
+    2,
+    Math.floor(availableWidth / (minCardWidth + cardSpacing))
+  );
+  const cardWidth =
+    (availableWidth - cardSpacing * (numColumns - 1)) / numColumns;
 
   return (
     <View style={styles.container}>
@@ -84,7 +89,7 @@ export default function HomeScreen() {
         showProfile={true}
         onSearchPress={handleSearch}
       />
-
+      
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -96,6 +101,13 @@ export default function HomeScreen() {
         }
       >
         <View style={styles.content}>
+          <View style={styles.backgroundContainer}>
+        <ImageBackground
+          source={require("@/assets/images/building.jpg")}
+          resizeMode="cover"
+          style={[styles.backgroundImagePattern, { opacity: 0.1 }]}
+        />
+      </View>
           <Animated.View
             entering={FadeInDown.delay(200).springify()}
             style={styles.section}
@@ -105,7 +117,7 @@ export default function HomeScreen() {
             </View>
 
             {categoriesLoading ? (
-              <CategorySkeleton count={4} />
+              <CategorySkeleton count={2} />
             ) : (
               <FlatList
                 data={categories}
@@ -118,15 +130,16 @@ export default function HomeScreen() {
             )}
           </Animated.View>
 
-          {!categoriesLoading && categories.map((category) => (
-            <Animated.View
-              key={category.id}
-              entering={FadeInDown.delay(400).springify()}
-              style={styles.section}
-            >
-              <CategorySection category={category} />
-            </Animated.View>
-          ))}
+          {!categoriesLoading &&
+            categories.map((category) => (
+              <Animated.View
+                key={category.id}
+                entering={FadeInDown.delay(400).springify()}
+                style={styles.section}
+              >
+                <CategorySection category={category} />
+              </Animated.View>
+            ))}
 
           <Animated.View
             entering={FadeInDown.delay(400).springify()}
@@ -134,9 +147,9 @@ export default function HomeScreen() {
           >
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>All Products</Text>
-              <TouchableOpacity onPress={() => router.push("/search")}>
+              {/* <TouchableOpacity onPress={() => router.push("/search")}>
                 <Text style={styles.seeAllButton}>See All</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
 
             <View style={styles.productsGrid}>
@@ -146,18 +159,19 @@ export default function HomeScreen() {
                   style={{
                     width: cardWidth,
                     marginBottom: SPACING.md,
-                    marginRight: (index + 1) % numColumns === 0 ? 0 : cardSpacing,
+                    marginRight:
+                      (index + 1) % numColumns === 0 ? 0 : cardSpacing,
                   }}
                 >
                   <ProductCard
                     id={product.id}
                     name={product.name}
                     images={product.images}
-                    likeCount={product.like_count}
+                    likeCount={getLikeCount(product.id)}
                     isLiked={isLiked(product.id)}
                     onPress={() => handleProductPress(product.id)}
-                    onLike={() => handleLikePress(product.id)}
-                    index={index}
+                    onLike={() => toggleLike(product.id)}
+                    disabled={isProcessing(product.id)} // optional if you want to block spam
                   />
                 </View>
               ))}
@@ -170,16 +184,28 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  backgroundContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  backgroundImagePattern: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
   container: {
     flex: 1,
-    backgroundColor: COLORS.screenBackground,
+    // backgroundColor: COLORS.screenBackground,
   },
   content: {
     flex: 1,
     paddingBottom: SPACING.lg,
   },
   section: {
-    marginBottom: SPACING.xl,
+    marginBottom: SPACING.sm,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -206,5 +232,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     paddingHorizontal: SPACING.lg,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5, //
   },
 });

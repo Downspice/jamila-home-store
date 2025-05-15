@@ -36,35 +36,36 @@ export default function Header({
   onSearchPress,
   onProfilePress,
   transparent = false,
-  productDetail=false
+  productDetail = false,
 }: HeaderProps) {
   const router = useRouter();
   const { profile } = useAuth();
-  const ProfilePress=()=>router.push("/profile");
+  const ProfilePress = () => {
+    console.log("pressed");
+    router.push("/profile");
+  };
   const avatar = profile?.avatar_url;
 
   const handleBackPress = () => {
     router.back();
   };
 
-  if(productDetail){
-    return(
-      <View style={[ styles.productDetailContainer]}>
-          
-            <TouchableOpacity
-              onPress={handleBackPress}
-              style={styles.iconButton}
-              activeOpacity={0.7}
-            >
-              <ArrowLeft size={22} color={COLORS.white} />
-            </TouchableOpacity>
-          </View>
-         
+  if (productDetail) {
+    return (
+      <View style={[styles.productDetailContainer]}>
+        <TouchableOpacity
+          onPress={handleBackPress}
+          style={styles.iconButton}
+          activeOpacity={0.7}
+        >
+          <ArrowLeft size={22} color={COLORS.white} />
+        </TouchableOpacity>
+      </View>
     );
   }
   if (transparent) {
     return (
-      <View style={[ styles.transparentContainer]}>
+      <View style={[styles.transparentContainer]}>
         {showBackButton && (
           <TouchableOpacity
             onPress={handleBackPress}
@@ -73,7 +74,7 @@ export default function Header({
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <BlurView intensity={80} tint="light" style={styles.blurButton}>
-              <ArrowLeft size={22} color={COLORS.white}/>
+              <ArrowLeft size={22} color={COLORS.white} />
             </BlurView>
           </TouchableOpacity>
         )}
@@ -141,10 +142,10 @@ export default function Header({
             <ArrowLeft size={22} color={COLORS.textPrimary} />
           </TouchableOpacity>
         ) : (
-          <View style={{ width: 30, height: 30 }}>
+          <View style={styles.logoSection}>
             <Image
               source={require("@/assets/images/inapp-logo.png")}
-              style={{ width: 22, height: 22 }}
+              style={styles.logo}
             />
           </View>
         )}
@@ -158,7 +159,7 @@ export default function Header({
             activeOpacity={0.7}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Search size={22} color={COLORS.black30} />
+            <Search size={20} color={COLORS.black90} />
             <Text style={styles.searchBarText}>Looking for something?</Text>
           </TouchableOpacity>
         )}
@@ -273,17 +274,33 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-start",
     alignItems: "center",
-    backgroundColor: COLORS.primaryLight,
+    backgroundColor: COLORS.screenBackground,
     borderRadius: SPACING.md,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderWidth: 0.5,
-    borderColor: COLORS.white20,
+    borderColor: COLORS.primary,
     gap: SPACING.xs,
   },
   searchBarText: {
     fontSize: 12,
-    color: COLORS.black30,
+    color: COLORS.black90,
     fontFamily: "Playfair-Regular",
+  },
+  logoSection: {
+    display: "flex",
+    width: 30,
+    height: 30,
+    backgroundColor: COLORS.white,
+    borderRadius: 15,
+    alignContent: "center",
+    justifyContent: "center",
+  },
+  logo: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    width: 24,
+    height: 24,
   },
 });

@@ -72,14 +72,14 @@ export default function ProfileScreen() {
     </TouchableOpacity>
   );
 
-    if (!user) {
-      return (
-        <View style={styles.container}>
-          <Header title="Profile" showBackButton={false} />
-          <UnAuthenticatedScreen/>
-        </View>
-      );
-    }
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Header title="Profile" showBackButton={false} />
+        <UnAuthenticatedScreen />
+      </View>
+    );
+  }
   return (
     <ScrollView
       style={styles.container}
@@ -136,6 +136,11 @@ export default function ProfileScreen() {
           label="About"
           onPress={() => router.push("/profile/about")}
         />
+        <Option
+          icon={<LogOut size={20} color={COLORS.danger} />}
+          label="Sign Out"
+          onPress={handleSignOut}
+        />
         {isAdmin && (
           <Option
             icon={<Settings size={20} color={COLORS.primary} />}
@@ -143,16 +148,6 @@ export default function ProfileScreen() {
             onPress={() => router.push("/admin")}
           />
         )}
-      </View>
-
-      <View style={{ marginTop: 30, paddingHorizontal: SPACING.lg }}>
-        <Button
-          title="Sign Out"
-          onPress={handleSignOut}
-          variant="outline"
-          icon={<LogOut size={18} color="#d32f2f" />}
-          textColor="#d32f2f"
-        />
       </View>
     </ScrollView>
   );
@@ -195,6 +190,7 @@ const styles = StyleSheet.create({
   },
   optionsSection: {
     marginTop: 30,
+    paddingHorizontal: 16,
   },
   optionRow: {
     flexDirection: "row",
@@ -203,6 +199,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     borderBottomWidth: 1,
     borderColor: "#eee",
+    // background:"
   },
   optionIcon: {
     width: 30,

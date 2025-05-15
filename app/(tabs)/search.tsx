@@ -8,6 +8,7 @@ import {
   Image,
   RefreshControl,
   TextInput,
+  useWindowDimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
@@ -23,7 +24,21 @@ export default function SearchScreen() {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const { results, loading, error, refreshing, onRefresh } = useSearch(query);
+  const { width: screenWidth } = useWindowDimensions();
+
   const animation = useRef<LottieView>(null);
+
+  // Responsive Grid Logic
+  const minCardWidth = 200;
+  const cardSpacing = SPACING.md;
+  const horizontalPadding = SPACING.lg * 2;
+  const availableWidth = screenWidth - horizontalPadding;
+  const numColumns = Math.max(
+    2,
+    Math.floor(availableWidth / (minCardWidth + cardSpacing))
+  );
+  const cardWidth =
+    (availableWidth - cardSpacing * (numColumns - 1)) / numColumns;
 
   const handleProductPress = (productId: string) => {
     router.push(`/product/${productId}`);
@@ -32,7 +47,7 @@ export default function SearchScreen() {
   const clearSearch = () => {
     setQuery("");
   };
-  const { toggleLike, isLiked } = useLikes();
+  const { toggleLike, isLiked, getLikeCount, isProcessing  } = useLikes();
   const handleLikePress = async (id: string) => {
     await toggleLike(id);
   };
@@ -90,28 +105,37 @@ export default function SearchScreen() {
               </Text>
             </View>
           ) : (
-            results.map((product, index) => (
-              <Animated.View
-                key={product.id}
-                entering={FadeInDown.delay(index * 100).springify()}
-              >
-                <TouchableOpacity
-                  onPress={() => handleProductPress(product.id)}
+            <View style={styles.productsGrid}>
+              {results.map((product, index) => (
+                <Animated.View
+                  key={product.id}
+                  entering={FadeInDown.delay(index * 100).springify()}
                 >
-                  <ProductCard
-                    key={product.id}
-                    id={product.id}
-                    name={product.name}
-                    images={product.images}
-                    likeCount={product.like_count}
-                    isLiked={isLiked(product.id)}
+                  <TouchableOpacity
                     onPress={() => handleProductPress(product.id)}
-                    onLike={() => handleLikePress(product.id)}
-                    index={index}
-                  />
-                </TouchableOpacity>
-              </Animated.View>
-            ))
+                    style={{
+                      width: cardWidth,
+                      marginBottom: SPACING.md,
+                      marginRight:
+                        (index + 1) % numColumns === 0 ? 0 : cardSpacing,
+                    }}
+                  >
+                    <ProductCard
+                      key={product.id}
+                      id={product.id}
+                      name={product.name}
+                      images={product.images} 
+                      isLiked={isLiked(product.id)}
+                      onPress={() => handleProductPress(product.id)}
+                      index={index} 
+                likeCount={getLikeCount(product.id)}
+                onLike={() => toggleLike(product.id)}
+                disabled={isProcessing(product.id)} 
+                    />
+                  </TouchableOpacity>
+                </Animated.View>
+              ))}
+            </View>
           )}
         </View>
       </ScrollView>
@@ -161,6 +185,10 @@ const styles = StyleSheet.create({
     margin: SPACING.xs,
     height: 150,
     maxWidth: "50%",
+  },
+  productsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
   image: {
     flex: 1,

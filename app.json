@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "jamila",
-    "slug": "Jamila Home",
+    "slug": "jamila",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -16,6 +16,9 @@
       "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
+    "android": {
+      "package": "com.jamilaHome.catalog"
+    },
     "plugins": [
       "expo-router",
       "expo-secure-store",
@@ -23,6 +26,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d21f639d-206b-4878-b23b-13445e76ec6e"
+      }
+    },
+    "owner": "dspice"
   }
 }

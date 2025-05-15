@@ -1,28 +1,33 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, FlatList, Alert, TouchableOpacity, Modal } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { COLORS, SPACING } from '@/constants/theme';
-import { useCatalogDetail } from '@/hooks/useCatalogs';
-import ProductCard from '@/components/ui/ProductCard';
-import Header from '@/components/shared/Header';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import Animated, { FadeInDown } from 'react-native-reanimated';
-import { Edit, Trash2, X } from 'lucide-react-native';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  FlatList,
+  Alert,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { COLORS, SPACING } from "@/constants/theme";
+import { useCatalogDetail } from "@/hooks/useCatalogs";
+import ProductCard from "@/components/ui/ProductCard";
+import Header from "@/components/shared/Header";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import { Edit, Trash2, X } from "lucide-react-native";
+import { useLikes } from "@/hooks/useLikes";
 
 export default function CatalogDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  
-  const { 
-    catalog, 
-    loading, 
-    removeProductFromCatalog,
-    renameCatalog 
-  } = useCatalogDetail(id as string);
+  const { isLiked, getLikeCount, toggleLike, isProcessing } = useLikes();
+  const { catalog, loading, removeProductFromCatalog, renameCatalog } =
+    useCatalogDetail(id as string);
 
   const [isRenameModalVisible, setIsRenameModalVisible] = useState(false);
-  const [newCatalogName, setNewCatalogName] = useState('');
+  const [newCatalogName, setNewCatalogName] = useState("");
 
   const handleProductPress = (productId: string) => {
     router.push(`/product/${productId}`);
@@ -30,19 +35,19 @@ export default function CatalogDetailScreen() {
 
   const handleRemoveProduct = async (productId: string) => {
     Alert.alert(
-      'Remove Product',
-      'Are you sure you want to remove this product from your catalog?',
+      "Remove Product",
+      "Are you sure you want to remove this product from your catalog?",
       [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Remove', 
-          style: 'destructive',
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          style: "destructive",
           onPress: async () => {
             const result = await removeProductFromCatalog(productId);
             if (result.error) {
-              Alert.alert('Error', 'Failed to remove product');
+              Alert.alert("Error", "Failed to remove product");
             }
-          }
+          },
         },
       ]
     );
@@ -56,22 +61,22 @@ export default function CatalogDetailScreen() {
 
   const handleDismissRenameModal = () => {
     setIsRenameModalVisible(false);
-    setNewCatalogName('');
+    setNewCatalogName("");
   };
 
   const handleRenameCatalog = async () => {
     if (!catalog || !newCatalogName.trim()) return;
-    
+
     try {
       const result = await renameCatalog(newCatalogName.trim());
       if (result.error) {
-        Alert.alert('Error', 'Failed to rename catalog');
+        Alert.alert("Error", "Failed to rename catalog");
         return;
       }
       handleDismissRenameModal();
     } catch (error) {
-      console.error('Error renaming catalog:', error);
-      Alert.alert('Error', 'Failed to rename catalog');
+      console.error("Error renaming catalog:", error);
+      Alert.alert("Error", "Failed to rename catalog");
     }
   };
 
@@ -83,14 +88,17 @@ export default function CatalogDetailScreen() {
       >
         <Trash2 size={18} color={COLORS.error} />
       </TouchableOpacity>
-      
+
       <ProductCard
         id={item.id}
         name={item.name}
         images={item.images}
-        likeCount={item.like_count}
-        onPress={() => handleProductPress(item.id)}
         index={index}
+        likeCount={getLikeCount(item.id)}
+        isLiked={isLiked(item.id)}
+        onPress={() => handleProductPress(item.id)}
+        onLike={() => toggleLike(item.id)}
+        disabled={isProcessing(item.id)} // optional if you want to block spam
       />
     </View>
   );
@@ -101,9 +109,9 @@ export default function CatalogDetailScreen() {
         <Header showBackButton title="Catalog Not Found" />
         <View style={styles.centerContent}>
           <Text style={styles.errorText}>Catalog not found</Text>
-          <Button 
-            title="Go Back" 
-            onPress={() => router.back()} 
+          <Button
+            title="Go Back"
+            onPress={() => router.back()}
             style={styles.backButton}
           />
         </View>
@@ -113,12 +121,9 @@ export default function CatalogDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <Header 
-        title={catalog?.name || 'Catalog'} 
-        showBackButton 
-      />
-      
-      <Animated.View 
+      <Header title={catalog?.name || "Catalog"} showBackButton />
+
+      <Animated.View
         entering={FadeInDown.delay(200).springify()}
         style={styles.headerActions}
       >
@@ -131,8 +136,8 @@ export default function CatalogDetailScreen() {
           size="small"
         />
       </Animated.View>
-      
-      <Animated.View 
+
+      <Animated.View
         entering={FadeInDown.delay(300).springify()}
         style={styles.content}
       >
@@ -152,9 +157,9 @@ export default function CatalogDetailScreen() {
                 <Text style={styles.emptySubText}>
                   Browse furniture and save items to this catalog!
                 </Text>
-                <Button 
-                  title="Browse Products" 
-                  onPress={() => router.push('/')} 
+                <Button
+                  title="Browse Products"
+                  onPress={() => router.push("/")}
                   style={styles.browseButton}
                   variant="primary"
                 />
@@ -178,11 +183,11 @@ export default function CatalogDetailScreen() {
                 <X size={24} color={COLORS.textPrimary} />
               </TouchableOpacity>
             </View>
-            
+
             <Text style={styles.modalDescription}>
               Enter a new name for your catalog
             </Text>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Catalog Name</Text>
               <Input
@@ -198,10 +203,7 @@ export default function CatalogDetailScreen() {
                 variant="outline"
                 onPress={handleDismissRenameModal}
               />
-              <Button
-                title="Rename"
-                onPress={handleRenameCatalog}
-              />
+              <Button title="Rename" onPress={handleRenameCatalog} />
             </View>
           </View>
         </View>
@@ -216,8 +218,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   headerActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "flex-end",
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.sm,
   },
@@ -229,13 +231,13 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xxl,
   },
   productContainer: {
-    position: 'relative',
+    position: "relative",
     flex: 1,
     margin: SPACING.xs,
-    maxWidth: '50%',
+    maxWidth: "50%",
   },
   removeButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 10,
     right: 10,
     zIndex: 10,
@@ -244,22 +246,22 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: SPACING.xxl,
   },
   emptyText: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: "Poppins-Medium",
     fontSize: 18,
     color: COLORS.textPrimary,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: SPACING.sm,
   },
   emptySubText: {
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
     fontSize: 16,
     color: COLORS.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: SPACING.xl,
   },
   browseButton: {
@@ -267,15 +269,15 @@ const styles = StyleSheet.create({
   },
   centerContent: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: SPACING.xl,
   },
   errorText: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: "Poppins-Medium",
     fontSize: 18,
     color: COLORS.textPrimary,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: SPACING.xl,
   },
   backButton: {
@@ -283,30 +285,30 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContent: {
     backgroundColor: COLORS.background,
     borderRadius: 16,
     padding: SPACING.lg,
-    width: '90%',
+    width: "90%",
     maxWidth: 400,
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: SPACING.md,
   },
   modalTitle: {
-    fontFamily: 'Poppins-Bold',
+    fontFamily: "Poppins-Bold",
     fontSize: 20,
     color: COLORS.textPrimary,
   },
   modalDescription: {
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
     fontSize: 14,
     color: COLORS.textSecondary,
     marginBottom: SPACING.xl,
@@ -315,14 +317,14 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,
   },
   inputLabel: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: "Poppins-Medium",
     fontSize: 14,
     color: COLORS.textPrimary,
     marginBottom: SPACING.xs,
   },
   modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     gap: SPACING.md,
   },
 });

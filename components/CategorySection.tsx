@@ -6,15 +6,19 @@ import { Category, Product } from "@/types";
 import ProductCard from "@/components/ui/ProductCard";
 import { useLikes } from "@/hooks/useLikes";
 import { COLORS, SPACING } from "@/constants/theme";
+import { BlurView } from "expo-blur";
+import { ArrowBigRightDash } from "lucide-react-native";
 
 interface CategorySectionProps {
   category: Category;
 }
 
-export const CategorySection: React.FC<CategorySectionProps> = ({ category }) => {
+export const CategorySection: React.FC<CategorySectionProps> = ({
+  category,
+}) => {
   const router = useRouter();
   const { products, loading } = useProductsByCategory(category.id);
-  const { toggleLike, isLiked } = useLikes();
+  const { toggleLike, isLiked, getLikeCount, isProcessing } = useLikes();
 
   const handleProductPress = (id: string) => {
     router.push(`/product/${id}`);
@@ -30,12 +34,13 @@ export const CategorySection: React.FC<CategorySectionProps> = ({ category }) =>
       id={item.id}
       name={item.name}
       images={item.images}
-      likeCount={item.like_count}
       isLiked={isLiked(item.id)}
       onPress={() => handleProductPress(item.id)}
-      onLike={() => handleLikePress(item.id)}
       style={styles.card}
       index={index}
+      likeCount={getLikeCount(item.id)}
+      onLike={() => toggleLike(item.id)}
+      disabled={isProcessing(item.id)} // optional if you want to block spam
     />
   );
 
@@ -50,37 +55,62 @@ export const CategorySection: React.FC<CategorySectionProps> = ({ category }) =>
   );
 
   return (
-    <View style={{ marginBottom: SPACING.xl }}>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>{category.name}</Text>
-        <Link href={`/category/${category.id}`} asChild>
-          <Pressable>
-            <Text style={styles.seeAllButton}>See More</Text>
-          </Pressable>
-        </Link>
-      </View>
+    <View style={styles.row}>
+      <View style={styles.container}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{category.name}</Text>
+          <Link href={`/category/${category.id}`} asChild>
+            <Pressable
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Text style={styles.seeAllButton}>See More</Text>
+              <ArrowBigRightDash color={COLORS.primary} />
+            </Pressable>
+          </Link>
+        </View>
 
-      <FlatList
-        data={loading ? [1, 2, 3, 4, 5] : products}
-        renderItem={loading ? renderSkeleton : renderProduct}
-        horizontal
-        keyExtractor={(item, index) =>
-          typeof item === "object" ? item.id : index.toString()
-        }
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ padding: 16 }}
-      />
+        <FlatList
+          data={loading ? [1, 2, 3, 4, 5] : products}
+          renderItem={loading ? renderSkeleton : renderProduct}
+          horizontal
+          keyExtractor={(item, index) =>
+            typeof item === "object" ? item.id : index.toString()
+          }
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ padding: 16 }}
+        />
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  row: {
+    // backgroundColor: COLORS.white, // or another color; must be non-transparent
+    // borderColor: COLORS.screenBackground,
+    // borderWidth: 1,
+    // borderRadius: 12,
+    // padding: 16, // ensures the content is not flush with edges
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5, // Android shadow
+  },
+  container: {
+    marginBottom: SPACING.sm,
+    // backgroundColor: COLORS.primary + "20",
+  },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: SPACING.xl,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.xs,
   },
   sectionTitle: {
     fontFamily: "Playfair-Bold",

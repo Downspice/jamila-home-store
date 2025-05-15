@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
   },
   skeleton: {
-    width: '48%',
+    width: '45%',
     height: 150,
     backgroundColor: COLORS.black10,
     borderRadius: 16,

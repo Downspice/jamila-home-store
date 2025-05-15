@@ -7,10 +7,10 @@ import { Heart, Share2, PhoneCall, ArrowBigLeft, ArrowLeft } from 'lucide-react-
 interface ProductHeaderProps {
   onBackPress: () => void;
   onLikePress: () => void;
-  onSharePress: () => void;
+  onSharePress: () => void; 
 }
 
-const ProductHeader = ({ onBackPress, onLikePress, onSharePress }: ProductHeaderProps) => {
+const ProductHeader = ({ onBackPress, onLikePress, onSharePress,  }: ProductHeaderProps) => {
   return (
     <View style={styles.container}>
       <BlurIconButton onPress={onBackPress}>

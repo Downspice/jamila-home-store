@@ -19,16 +19,9 @@ import { useCatalogs } from "@/hooks/useCatalogs";
 import Header from "@/components/shared/Header";
 import ImageCarousel from "@/components/shared/ImageCarousel";
 import Button from "@/components/ui/Button";
-import GlassmorphicCard from "@/components/ui/GlassmorphicCard";
 import { useAuth } from "@/context/AuthContext";
 import { Heart, Share2, Bookmark, Tag, PhoneCall } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import Animated, {
-  FadeInDown,
-  useSharedValue,
-  withSpring,
-  useAnimatedStyle,
-} from "react-native-reanimated";
 import { supabase } from "@/lib/supabase";
 import ProductDetailSkeleton from "@/components/product/ProductDetailSkeleton";
 import SaveToCatalogSheet from "@/components/product/SaveToCatalogSheet";
@@ -44,7 +37,7 @@ export default function ProductDetailScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { product, loading } = useProductDetail(id as string);
-  const { toggleLike, isLiked,likedProducts } = useLikes();
+  const { toggleLike, isLiked, likedProducts } = useLikes();
   const { catalogs, createCatalog } = useCatalogs(id as string);
 
   const [showCatalogSheet, setShowCatalogSheet] = useState(false);
@@ -52,8 +45,7 @@ export default function ProductDetailScreen() {
   const IMAGE_SECTION_HEIGHT = SCREEN_HEIGHT * 0.7;
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState("3x3");
-  console.log("this is the current product",product?.like_count);
-  const [likeCount, setLikeCount] = useState<number>(product?.like_count || 0);
+  const [likeCount, setLikeCount] = useState<number | null>(null);
   const productIsLiked = product ? likedProducts.includes(product.id) : false;
 
   const handleShareProduct = async () => {
@@ -112,9 +104,13 @@ export default function ProductDetailScreen() {
 
     await toggleLike(product.id).then(() => {
       if (productIsLiked) {
-        setLikeCount(likeCount - 1);
+        if (product.like_count === 0) {
+          setLikeCount(null);
+        } else {
+          setLikeCount(product.like_count - 1);
+        }
       } else {
-        setLikeCount(likeCount + 1);
+        setLikeCount(product.like_count + 1);
       }
     });
   };
@@ -191,16 +187,12 @@ export default function ProductDetailScreen() {
     );
   }
 
-  if (product?.images) {
-    // console.log("Preview thumbnails images:", product.images);
-  }
-
   return (
     <View style={styles.container}>
       <ProductHeader
         onBackPress={() => router.back()}
-        onLikePress={() => console.log("Liked")}
         onSharePress={handleShareProduct}
+        onLikePress={handleLikePress}
       />
 
       {/* Absolute Image */}
@@ -211,7 +203,6 @@ export default function ProductDetailScreen() {
           resizeMode="cover"
         />
       )}
-
 
       {/* Main Scrollable Content */}
       <ScrollView
@@ -253,7 +244,7 @@ export default function ProductDetailScreen() {
                   fill={productIsLiked ? COLORS.error : "transparent"}
                 />
               </TouchableOpacity>
-              <Text>{likeCount === 0 ? likeCount : likeCount}</Text>
+              <Text>{likeCount == null ?  product?.like_count:likeCount }</Text>
             </View>
           </View>
           {/* Like/Share */}

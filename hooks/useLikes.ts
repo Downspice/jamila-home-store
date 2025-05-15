@@ -2,10 +2,16 @@ import { StatusBar } from "expo-status-bar";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import { Alert } from "react-native";
+import { router } from "expo-router";
 
 export const useLikes = () => {
   const { user } = useAuth();
+
   const [likedProducts, setLikedProducts] = useState<string[]>([]);
+  const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
+  const [processingIds, setProcessingIds] = useState<string[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -13,6 +19,7 @@ export const useLikes = () => {
   const fetchLikedProducts = async () => {
     if (!user) {
       setLikedProducts([]);
+      setLikeCounts({});
       setLoading(false);
       return;
     }
@@ -26,14 +33,24 @@ export const useLikes = () => {
         .select("product_id")
         .eq("user_id", user.id);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      if (data) {
-        setLikedProducts(data.map((like) => like.product_id));
-        console.log("Fetched liked products:", data);
-      }
+      const liked = data.map((like) => like.product_id);
+      setLikedProducts(liked);
+
+      // Also fetch all like counts
+      const { data: allProducts, error: productError } = await supabase
+        .from("products")
+        .select("id, like_count");
+
+      if (productError) throw productError;
+
+      const counts: Record<string, number> = {};
+      allProducts?.forEach((product) => {
+        counts[product.id] = product.like_count || 0;
+      });
+
+      setLikeCounts(counts);
     } catch (error: any) {
       console.error("Error fetching liked products:", error);
       setError(error.message);
@@ -53,96 +70,107 @@ export const useLikes = () => {
   }, [user]);
 
   const toggleLike = async (productId: string) => {
-    if (!user) return { error: new Error("User not authenticated") };
-  
-    const isLiked = likedProducts.includes(productId);
-    console.log("isLiked product is:", productId, isLiked);
-  
+    if (!user) {
+      Alert.alert("Sign In Required", "Please sign in to like products", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Sign In", onPress: () => router.push("/login") },
+      ]);
+      return;
+    }
+
+    if (processingIds.includes(productId)) return;
+
+    setProcessingIds((prev) => [...prev, productId]);
+
+    const isCurrentlyLiked = likedProducts.includes(productId);
+    const currentCount = likeCounts[productId] || 0;
+
+    // Optimistic UI update
+    setLikedProducts((prev) =>
+      isCurrentlyLiked ? prev.filter((id) => id !== productId) : [...prev, productId]
+    );
+    setLikeCounts((prev) => ({
+      ...prev,
+      [productId]: isCurrentlyLiked ? Math.max(currentCount - 1, 0) : currentCount + 1,
+    }));
+
     try {
-      if (isLiked) {
-        // === UNLIKE ===
-        console.log("Unliking product:", productId);
-  
-        const { error: deleteError } = await supabase
+      if (isCurrentlyLiked) {
+        await supabase
           .from("user_likes")
           .delete()
           .eq("user_id", user.id)
           .eq("product_id", productId);
-  
-        if (deleteError) throw deleteError;
-  
-        // Fetch current like_count
+
         const { data: productData, error: fetchError } = await supabase
           .from("products")
           .select("like_count")
           .eq("id", productId)
           .single();
-  
+
         if (fetchError) throw fetchError;
-  
+
         const newCount = Math.max((productData?.like_count || 1) - 1, 0);
-  
-        const { error: updateError } = await supabase
+
+        await supabase
           .from("products")
           .update({ like_count: newCount })
           .eq("id", productId);
-  
-        if (updateError) throw updateError;
-  
-        setLikedProducts((prev) => prev.filter((id) => id !== productId));
       } else {
-        // === LIKE ===
-        console.log("Liking product:", productId);
-  
-        const { error: insertError } = await supabase.from("user_likes").insert({
+        await supabase.from("user_likes").insert({
           user_id: user.id,
           product_id: productId,
         });
-  
-        if (insertError) throw insertError;
-  
-        // Fetch current like_count
+
         const { data: productData, error: fetchError } = await supabase
           .from("products")
           .select("like_count")
           .eq("id", productId)
           .single();
-  
+
         if (fetchError) throw fetchError;
-  
+
         const newCount = (productData?.like_count || 0) + 1;
-  
-        const { error: updateError } = await supabase
+
+        await supabase
           .from("products")
           .update({ like_count: newCount })
           .eq("id", productId);
-  
-        if (updateError) throw updateError;
-  
-        setLikedProducts((prev) => [...prev, productId]);
       }
 
-      return { success: true, isLiked: !isLiked };
+      return { success: true, isLiked: !isCurrentlyLiked };
     } catch (error: any) {
-      console.error("Error toggling like:", error);
+      console.error("Toggle like failed:", error);
+
+      // Revert optimistic update
+      setLikedProducts((prev) =>
+        isCurrentlyLiked ? [...prev, productId] : prev.filter((id) => id !== productId)
+      );
+      setLikeCounts((prev) => ({
+        ...prev,
+        [productId]: currentCount,
+      }));
+
       return { error };
+    } finally {
+      setProcessingIds((prev) => prev.filter((id) => id !== productId));
     }
   };
-  
 
-  const isLiked = (productId: string) => {
-    return likedProducts.includes(productId);
-  };
+  const isLiked = (productId: string) => likedProducts.includes(productId);
+  const getLikeCount = (productId: string) => likeCounts[productId] ?? 0;
+  const isProcessing = (productId: string) => processingIds.includes(productId);
 
   return {
     likedProducts,
+    likeCounts,
     loading,
     error,
     toggleLike,
     isLiked,
+    getLikeCount,
+    isProcessing,
     refreshing,
     onRefresh,
   };
 };
-
-

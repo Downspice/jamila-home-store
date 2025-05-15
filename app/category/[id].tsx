@@ -1,19 +1,27 @@
-import React from 'react';
-import { StyleSheet, View, Text, FlatList, useWindowDimensions } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { COLORS, SPACING } from '@/constants/theme';
-import { useProducts } from '@/hooks/useProducts';
-import { useCategoryDetail } from '@/hooks/useCategories';
-import { useLikes } from '@/hooks/useLikes';
-import ProductCard from '@/components/ui/ProductCard';
-import Header from '@/components/shared/Header';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import React from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  FlatList,
+  useWindowDimensions,
+} from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { COLORS, SPACING } from "@/constants/theme";
+import { useProducts } from "@/hooks/useProducts";
+import { useCategoryDetail } from "@/hooks/useCategories";
+import { useLikes } from "@/hooks/useLikes";
+import ProductCard from "@/components/ui/ProductCard";
+import Header from "@/components/shared/Header";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 export default function CategoryDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  
-  const { category, loading: categoryLoading } = useCategoryDetail(id as string);
+
+  const { category, loading: categoryLoading } = useCategoryDetail(
+    id as string
+  );
   const { products, loading: productsLoading } = useProducts(id as string);
   const { toggleLike, isLiked } = useLikes();
   const { width: screenWidth } = useWindowDimensions();
@@ -40,51 +48,54 @@ export default function CategoryDetailScreen() {
   //   />
   // );
 
-    // Responsive Grid Logic
-    const minCardWidth = 200;
-    const cardSpacing = SPACING.md;
-    const horizontalPadding = SPACING.lg * 2;
-    const availableWidth = screenWidth - horizontalPadding;
-    const numColumns = Math.max(2, Math.floor(availableWidth / (minCardWidth + cardSpacing)));
-    const cardWidth = (availableWidth - cardSpacing * (numColumns - 1)) / numColumns;
-  
+  // Responsive Grid Logic
+  const minCardWidth = 200;
+  const cardSpacing = SPACING.md;
+  const horizontalPadding = SPACING.lg * 2;
+  const availableWidth = screenWidth - horizontalPadding;
+  const numColumns = Math.max(
+    2,
+    Math.floor(availableWidth / (minCardWidth + cardSpacing))
+  );
+  const cardWidth =
+    (availableWidth - cardSpacing * (numColumns - 1)) / numColumns;
+
   return (
     <View style={styles.container}>
-      <Header 
-        title={category?.name || 'Category'} 
-        showBackButton 
+      <Header
+        title={category?.name || "Category"}
+        showBackButton
         showSearch
-        onSearchPress={() => router.push('/search')}
+        onSearchPress={() => router.push("/search")}
       />
-      
-      <Animated.View 
+
+      <Animated.View
         entering={FadeInDown.delay(200).springify()}
         style={styles.content}
       >
-
-<View style={styles.productsGrid}>
-              {products.map((product, index) => (
-                <View
-                  key={product.id}
-                  style={{
-                    width: cardWidth,
-                    marginBottom: SPACING.md,
-                    marginRight: (index + 1) % numColumns === 0 ? 0 : cardSpacing,
-                  }}
-                >
-                  <ProductCard
-                    id={product.id}
-                    name={product.name}
-                    images={product.images}
-                    likeCount={product.like_count}
-                    isLiked={isLiked(product.id)}
-                    onPress={() => handleProductPress(product.id)}
-                    onLike={() => handleLikePress(product.id)}
-                    index={index}
-                  />
-                </View>
-              ))}
+        <View style={styles.productsGrid}>
+          {products.map((product, index) => (
+            <View
+              key={product.id}
+              style={{
+                width: cardWidth,
+                marginBottom: SPACING.md,
+                marginRight: (index + 1) % numColumns === 0 ? 0 : cardSpacing,
+              }}
+            >
+              <ProductCard
+                id={product.id}
+                name={product.name}
+                images={product.images}
+                likeCount={product.like_count}
+                isLiked={isLiked(product.id)}
+                onPress={() => handleProductPress(product.id)}
+                onLike={() => handleLikePress(product.id)}
+                index={index}
+              />
             </View>
+          ))}
+        </View>
 
         {/* <FlatList
           data={products}
@@ -97,7 +108,7 @@ export default function CategoryDetailScreen() {
             category?.description ? (
               <Text style={styles.description}>
                 {/* {category.description} */}
-              {/* </Text>
+        {/* </Text>
             ) : null
           }
           ListEmptyComponent={
@@ -109,7 +120,7 @@ export default function CategoryDetailScreen() {
               </View>
             ) : null
           }
-        /> */}  
+        /> */}
       </Animated.View>
     </View>
   );
@@ -118,14 +129,14 @@ export default function CategoryDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.screenBackground,
   },
   content: {
     flex: 1,
-    padding: SPACING.lg,
+    // padding: SPACING.lg,
   },
   description: {
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
     fontSize: 16,
     color: COLORS.textSecondary,
     marginBottom: SPACING.xl,
@@ -134,19 +145,19 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xxl,
   },
   emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: SPACING.xxl,
   },
   emptyText: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: "Poppins-Medium",
     fontSize: 16,
     color: COLORS.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
   },
   productsGrid: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      paddingHorizontal: SPACING.lg,
-    },
+    flexDirection: "row",
+    flexWrap: "wrap",
+    paddingHorizontal: SPACING.lg,
+  },
 });
