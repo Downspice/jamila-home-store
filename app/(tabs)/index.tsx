@@ -9,8 +9,9 @@ import {
   RefreshControl,
   useWindowDimensions,
   ImageBackground,
+  ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
 import { useProducts } from "@/hooks/useProducts";
 import { useCategories } from "@/hooks/useCategories";
@@ -21,23 +22,37 @@ import CategorySkeleton from "@/components/ui/CategorySkeleton";
 import { CategorySection } from "@/components/CategorySection";
 import Header from "@/components/shared/Header";
 import Animated, { FadeInDown } from "react-native-reanimated";
+import AllProducts from "@/components/sections/allProducts";
 
 const imageCache = new Map<string, string>();
-
 export default function HomeScreen() {
-  const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const { width: screenWidth } = useWindowDimensions();
 
-  const {
-    products,
-    loading: productsLoading,
-    refreshing,
-    onRefresh,
-  } = useProducts();
+  const { products, loading, refreshing, onRefresh, loadMore, hasMore } =
+    useProducts();
+  // console.log(
+  //   "Products:",
+  //   products.forEach((product) => console.log(product.name))
+  // );
   const { categories, loading: categoriesLoading } = useCategories();
   const { isLiked, getLikeCount, toggleLike, isProcessing } = useLikes();
 
+  const minCardWidth = 200;
+  const cardSpacing = SPACING.md;
+  const horizontalPadding = SPACING.lg * 2;
+  const availableWidth = screenWidth - horizontalPadding;
+  const numColumns = Math.max(
+    2,
+    Math.floor(availableWidth / (minCardWidth + cardSpacing))
+  );
+  const cardWidth =
+    (availableWidth - cardSpacing * (numColumns - 1)) / numColumns;
+
+  const handleSearch = () => router.push("/search");
+  const handleProductPress = (id: string) => router.push(`/product/${id}`);
+  const handleCategoryPress = (id: string) => router.push(`/category/${id}`);
+  const handleLikePress = async (id: string) => await toggleLike(id);
   // Preload and cache images
   useEffect(() => {
     if (products) {
@@ -51,12 +66,6 @@ export default function HomeScreen() {
       });
     }
   }, [products]);
-
-  const handleSearch = () => router.push("/search");
-  const handleProductPress = (id: string) => router.push(`/product/${id}`);
-  const handleCategoryPress = (id: string) => router.push(`/category/${id}`);
-  const handleLikePress = async (id: string) => await toggleLike(id);
-
   const renderCategoryItem = ({ item, index }: any) => (
     <CategoryCard
       id={item.id}
@@ -66,30 +75,39 @@ export default function HomeScreen() {
       index={index}
     />
   );
-
-  // Responsive Grid Logic
-  const minCardWidth = 200;
-  const cardSpacing = SPACING.md;
-  const horizontalPadding = SPACING.lg * 2;
-  const availableWidth = screenWidth - horizontalPadding;
-  const numColumns = Math.max(
-    2,
-    Math.floor(availableWidth / (minCardWidth + cardSpacing))
+  const renderItem = ({ item, index }: any) => (
+    <View
+      key={item.id}
+      style={{
+        width: cardWidth,
+        marginBottom: SPACING.md,
+        marginRight: (index + 1) % numColumns === 0 ? 0 : cardSpacing,
+      }}
+    >
+      <ProductCard
+        id={item.id}
+        name={item.name}
+        images={item.images}
+        likeCount={getLikeCount(item.id)}
+        isLiked={isLiked(item.id)}
+        onPress={() => handleProductPress(item.id)}
+        onLike={() => toggleLike(item.id)}
+        disabled={isProcessing(item.id)}
+      />
+    </View>
   );
-  const cardWidth =
-    (availableWidth - cardSpacing * (numColumns - 1)) / numColumns;
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1 }}>
       <Header
         title=""
         showBackButton={false}
         transparent={false}
         showSearchBar={true}
         showProfile={true}
-        onSearchPress={handleSearch}
+        onSearchPress={() => router.push("/search")}
       />
-      
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -102,12 +120,12 @@ export default function HomeScreen() {
       >
         <View style={styles.content}>
           <View style={styles.backgroundContainer}>
-        <ImageBackground
-          source={require("@/assets/images/building.jpg")}
-          resizeMode="cover"
-          style={[styles.backgroundImagePattern, { opacity: 0.1 }]}
-        />
-      </View>
+            <ImageBackground
+              source={require("@/assets/images/building.jpg")}
+              resizeMode="cover"
+              style={[styles.backgroundImagePattern, { opacity: 0.1 }]}
+            />
+          </View>
           <Animated.View
             entering={FadeInDown.delay(200).springify()}
             style={styles.section}
@@ -151,31 +169,49 @@ export default function HomeScreen() {
                 <Text style={styles.seeAllButton}>See All</Text>
               </TouchableOpacity> */}
             </View>
-
-            <View style={styles.productsGrid}>
-              {products.map((product, index) => (
-                <View
-                  key={product.id}
-                  style={{
-                    width: cardWidth,
-                    marginBottom: SPACING.md,
-                    marginRight:
-                      (index + 1) % numColumns === 0 ? 0 : cardSpacing,
-                  }}
-                >
-                  <ProductCard
-                    id={product.id}
-                    name={product.name}
-                    images={product.images}
-                    likeCount={getLikeCount(product.id)}
-                    isLiked={isLiked(product.id)}
-                    onPress={() => handleProductPress(product.id)}
-                    onLike={() => toggleLike(product.id)}
-                    disabled={isProcessing(product.id)} // optional if you want to block spam
-                  />
-                </View>
-              ))}
-            </View>
+            <AllProducts/>
+            {/* <FlatList
+              data={products}
+              keyExtractor={(item) => item.id}
+              numColumns={numColumns}
+              renderItem={renderItem}
+              contentContainerStyle={{
+                paddingHorizontal: SPACING.lg,
+                paddingBottom: SPACING.xl,
+              }}
+              onEndReached={() => {
+                if (hasMore && !loading) {
+                  loadMore();
+                }
+                if (loading) {
+                  <ActivityIndicator size="small" color={COLORS.primary} />;
+                }
+              }}
+              onEndReachedThreshold={0.5}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  tintColor={COLORS.primary}
+                />
+              }
+              ListFooterComponent={
+                loading ? (
+                  <Text style={{ textAlign: "center", padding: 16 }}>
+                    Loading...
+                  </Text>
+                ) : (
+                  <Text style={{ textAlign: "center", padding: 16 }}>end</Text>
+                )
+              }
+              ListHeaderComponent={
+                <Animated.View entering={FadeInDown.delay(200).springify()}>
+                  <Text style={{ fontSize: 22, margin: SPACING.lg }}>
+                    All Products
+                  </Text>
+                </Animated.View>
+              }
+            /> */}
           </Animated.View>
         </View>
       </ScrollView>

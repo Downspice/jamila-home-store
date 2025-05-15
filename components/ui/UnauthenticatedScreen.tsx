@@ -6,7 +6,7 @@ import { LogIn } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
 
-export default function UnAuthenticatedScreen() {
+export default function UnAuthenticatedScreen( {page} : {page:string}) {
   const animation = useRef<LottieView>(null);
   const router = useRouter();
 
@@ -24,7 +24,7 @@ export default function UnAuthenticatedScreen() {
       />
 
       <Text style={styles.loginMessage}>
-        Please sign in to view your profile
+        Please sign in to view your {page}
       </Text>
       <Button
         title="Sign In"

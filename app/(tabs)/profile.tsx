@@ -76,7 +76,7 @@ export default function ProfileScreen() {
     return (
       <View style={styles.container}>
         <Header title="Profile" showBackButton={false} />
-        <UnAuthenticatedScreen />
+        <UnAuthenticatedScreen page={"Profile"}   />
       </View>
     );
   }

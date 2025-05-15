@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = async (userId: string) => {
     try {
-      console.log('Fetching profile for user:', userId);
+      // console.log('Fetching profile for user:', userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -67,12 +67,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         console.error('Error fetching profile:', error);
       } else if (data) {
-        console.log('Profile fetched successfully:', data);
-        console.log('is_admin value:', data.is_admin);
-        console.log('Setting profile and admin status...');
+        // console.log('Profile fetched successfully:', data);
+        // console.log('is_admin value:', data.is_admin);
+        // console.log('Setting profile and admin status...');
         setProfile(data);
         setIsAdmin(data.is_admin);
-        console.log('Admin status set to:', data.is_admin);
+        // console.log('Admin status set to:', data.is_admin);
       } else {
         console.log('No profile found for user:', userId);
       }

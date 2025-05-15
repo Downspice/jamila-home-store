@@ -151,7 +151,7 @@ export default function CatalogsScreen() {
     return (
       <View style={styles.container}>
         <Header title="My Catalogs" />
-        <UnAuthenticatedScreen />
+        <UnAuthenticatedScreen page={"Catalogs"} />
       </View>
     );
   }

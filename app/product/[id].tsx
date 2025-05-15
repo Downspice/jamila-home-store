@@ -28,6 +28,7 @@ import SaveToCatalogSheet from "@/components/product/SaveToCatalogSheet";
 import ProductHeader from "@/components/ui/ProductHeader";
 import Pill from "@/components/ui/Pill";
 import { callFn } from "@/utils/enquiryFn";
+import { LikeButton } from "@/components/animatedButtons/like";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const IMAGE_HEIGHT = SCREEN_HEIGHT * 0.6;
@@ -37,7 +38,7 @@ export default function ProductDetailScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const { product, loading } = useProductDetail(id as string);
-  const { toggleLike, isLiked, likedProducts } = useLikes();
+  const { toggleLike, isLiked, likedProducts, isProcessing } = useLikes();
   const { catalogs, createCatalog } = useCatalogs(id as string);
 
   const [showCatalogSheet, setShowCatalogSheet] = useState(false);
@@ -102,17 +103,23 @@ export default function ProductDetailScreen() {
       return;
     }
 
-    await toggleLike(product.id).then(() => {
-      if (productIsLiked) {
-        if (product.like_count === 0) {
-          setLikeCount(null);
-        } else {
-          setLikeCount(product.like_count - 1);
-        }
-      } else {
-        setLikeCount(product.like_count + 1);
-      }
-    });
+    const wasLiked = productIsLiked;
+
+    console.log("productIsLiked count", product.like_count);
+
+    await toggleLike(product.id);
+
+    if (wasLiked) {
+      setLikeCount((prev) =>
+        prev != null ? Math.max(prev - 1, 0) : (product.like_count ?? 0) - 1
+      );
+      router.reload();
+    } else {
+      setLikeCount((prev) =>
+        prev != null ? prev + 1 : (product.like_count ?? 0) + 1
+      );
+      router.reload();
+    }
   };
 
   const handleSaveToCatalog = () => {
@@ -186,13 +193,16 @@ export default function ProductDetailScreen() {
       </View>
     );
   }
+  console.log("Product:", product);
 
   return (
     <View style={styles.container}>
       <ProductHeader
         onBackPress={() => router.back()}
         onSharePress={handleShareProduct}
-        onLikePress={handleLikePress}
+        onLikePress={() => {
+          handleLikePress();
+        }}
       />
 
       {/* Absolute Image */}
@@ -237,14 +247,19 @@ export default function ProductDetailScreen() {
             <Text style={styles.productName}>{product?.name}</Text>
             {/* Categories */}
             <View style={styles.likeContainer}>
-              <TouchableOpacity onPress={() => handleLikePress()}>
-                <Heart
+              <TouchableOpacity onPress={() => {}}>
+                {/* <Heart
                   size={20}
                   color={productIsLiked ? "transparent" : COLORS.textSecondary}
                   fill={productIsLiked ? COLORS.error : "transparent"}
+                /> */}
+                <LikeButton
+                  liked={isLiked(product?.id)}
+                  onToggle={() => handleLikePress()}
+                  disabled={isProcessing(product.id)}
                 />
               </TouchableOpacity>
-              <Text>{likeCount == null ?  product?.like_count:likeCount }</Text>
+              <Text>{likeCount == null ? product?.like_count : likeCount}</Text>
             </View>
           </View>
           {/* Like/Share */}

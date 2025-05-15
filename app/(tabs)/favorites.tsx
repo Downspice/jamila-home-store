@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
-import { useProducts } from "@/hooks/useProducts";
+import { Product, useProducts } from "@/hooks/useProducts";
 import { useLikes } from "@/hooks/useLikes";
 import ProductCard from "@/components/ui/ProductCard";
 import Header from "@/components/shared/Header";
@@ -21,7 +21,7 @@ import UnAuthenticatedScreen from "@/components/ui/UnauthenticatedScreen";
 export default function FavoritesScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const { products, loading } = useProducts();
+  const { fetchAllProducts, loading } = useProducts();
   const {
     likedProducts,
     loading: likesLoading,
@@ -34,10 +34,28 @@ export default function FavoritesScreen() {
     isProcessing,
   } = useLikes();
 
-  // Filter products to only show liked ones
-  const likedProductsList = products.filter((product) =>
-    likedProducts.includes(product.id)
-  );
+const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      const data = await fetchAllProducts();
+      if (data) setProducts(data);
+    };
+
+    loadProducts();
+  }, []);
+
+  let likedProductsList: typeof products = [];
+
+if (products && likedProducts && Array.isArray(likedProducts)) {
+  console.log("all products:", products);
+  likedProductsList = products.filter((product) => {
+    const isLiked = likedProducts.includes(product.id);
+    console.log(`Product ${product.id} is liked: ${isLiked}`);
+    return isLiked;
+  });
+}
+
 
   const handleProductPress = (id: string) => {
     router.push(`/product/${id}`);
@@ -51,22 +69,31 @@ export default function FavoritesScreen() {
     return (
       <View style={styles.container}>
         <Header title="Favorites" showBackButton={false} />
-        <UnAuthenticatedScreen />
+        <UnAuthenticatedScreen page={"Favorites"} />
       </View>
     );
   }
 
-  if (loading) {
-    return <ProductSkeleton />;
-  }
-
-  if (likedProductsList.length === 0) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.message}>No favorites yet</Text>
-      </View>
-    );
-  }
+  // if (likedProductsList.length === 0) {
+  //   return (
+  //     <View style={styles.container}>
+  //       <Header title="Favorites" showBackButton={false} />
+  //       <ScrollView
+  //         style={styles.content}
+  //         showsVerticalScrollIndicator={false}
+  //         refreshControl={
+  //           <RefreshControl
+  //             refreshing={refreshing}
+  //             onRefresh={onRefresh}
+  //             tintColor={COLORS.primary}
+  //           />
+  //         }
+  //       >
+  //         <Text style={styles.message}>No favorites yet</Text>
+  //       </ScrollView>
+  //     </View>
+  //   );
+  // }
 
   return (
     <View style={styles.container}>
@@ -83,12 +110,14 @@ export default function FavoritesScreen() {
         }
       >
         <View style={styles.grid}>
-          {likedProductsList.map((product, index) => (
+          {likesLoading ?? <ProductSkeleton />}
+          {likedProductsList? likedProductsList.map((product, index) => (
             <Animated.View
               key={product.id}
               entering={FadeInDown.delay(index * 100).springify()}
             >
               <ProductCard
+                key={product.id}
                 id={product.id}
                 name={product.name}
                 images={product.images}
@@ -101,7 +130,7 @@ export default function FavoritesScreen() {
                 disabled={isProcessing(product.id)} // optional if you want to block spam
               />
             </Animated.View>
-          ))}
+          )): null}
         </View>
       </ScrollView>
     </View>
