@@ -193,7 +193,6 @@ export default function ProductDetailScreen() {
       </View>
     );
   }
-  console.log("Product:", product);
 
   return (
     <View style={styles.container}>

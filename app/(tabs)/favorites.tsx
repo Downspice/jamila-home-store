@@ -48,10 +48,10 @@ const [products, setProducts] = useState<Product[]>([]);
   let likedProductsList: typeof products = [];
 
 if (products && likedProducts && Array.isArray(likedProducts)) {
-  console.log("all products:", products);
+  // console.log("all products:", products);
   likedProductsList = products.filter((product) => {
     const isLiked = likedProducts.includes(product.id);
-    console.log(`Product ${product.id} is liked: ${isLiked}`);
+    // console.log(`Product ${product.id} is liked: ${isLiked}`);
     return isLiked;
   });
 }
