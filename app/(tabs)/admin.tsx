@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -15,7 +15,7 @@ import { useAuth } from "@/context/AuthContext";
 import Header from "@/components/shared/Header";
 import GlassmorphicCard from "@/components/ui/GlassmorphicCard";
 import FloatingActionButton from "@/components/ui/FloatingActionButton";
-import { useProducts } from "@/hooks/useProducts";
+import { Product, useAllProducts, useProducts } from "@/hooks/useProducts";
 import { useCategories } from "@/hooks/useCategories";
 import { Edit, Plus, Trash2 } from "lucide-react-native";
 import { supabase } from "@/lib/supabase";
@@ -29,14 +29,27 @@ export default function AdminScreen() {
     products,
     loading: productsLoading,
     refetch: refetchProducts,
+    fetchAllProducts,
   } = useProducts();
   const {
     categories,
     loading: categoriesLoading,
     refetch: refetchCategories,
   } = useCategories();
+  const {
+    allProducts,
+    loading: allProductsLoading,
+    error: allProductsError,
+  } = useAllProducts();
 
   const [selectedTab, setSelectedTab] = useState("products");
+
+  // const [allProducts, setAllProducts] = useState<Product[]>([]);
+  // useEffect(() => {
+  //   const data = fetchAllProducts();
+  //   console.log("jsjbjsb", products);
+  //   setAllProducts(data);
+  // }, []);
 
   if (!user || !isAdmin) {
     return (
@@ -161,125 +174,129 @@ export default function AdminScreen() {
     try {
       // Check if there are products in this category
       const { data: products, error: productsError } = await supabase
-        .from('product_categories')
-        .select('product_id')
-        .eq('category_id', id);
+        .from("product_categories")
+        .select("product_id")
+        .eq("category_id", id);
 
       if (productsError) throw productsError;
 
       if (products && products.length > 0) {
         // Get all available categories except the one being deleted
         const { data: otherCategories, error: categoriesError } = await supabase
-          .from('categories')
-          .select('id, name')
-          .neq('id', id);
+          .from("categories")
+          .select("id, name")
+          .neq("id", id);
 
         if (categoriesError) throw categoriesError;
 
         if (!otherCategories || otherCategories.length === 0) {
           Alert.alert(
-            'Error',
-            'Cannot delete the last category. Please create another category first.'
+            "Error",
+            "Cannot delete the last category. Please create another category first."
           );
           return;
         }
 
         // Show dialog to select new category
         Alert.alert(
-          'Reassign Products',
-          'This category contains products. Please select a new category to reassign them to:',
+          "Reassign Products",
+          "This category contains products. Please select a new category to reassign them to:",
           [
-            ...otherCategories.map(category => ({
+            ...otherCategories.map((category) => ({
               text: category.name,
               onPress: async () => {
                 try {
                   // Update all products to the new category
                   const { error: updateError } = await supabase
-                    .from('product_categories')
+                    .from("product_categories")
                     .update({ category_id: category.id })
-                    .eq('category_id', id);
+                    .eq("category_id", id);
 
                   if (updateError) throw updateError;
 
                   // Get the category's image URL before deleting
-                  const { data: categoryData, error: categoryError } = await supabase
-                    .from('categories')
-                    .select('image_url')
-                    .eq('id', id)
-                    .single();
+                  const { data: categoryData, error: categoryError } =
+                    await supabase
+                      .from("categories")
+                      .select("image_url")
+                      .eq("id", id)
+                      .single();
 
                   if (categoryError) throw categoryError;
 
                   // Delete the category
                   const { error: deleteError } = await supabase
-                    .from('categories')
+                    .from("categories")
                     .delete()
-                    .eq('id', id);
+                    .eq("id", id);
 
                   if (deleteError) throw deleteError;
 
                   // Delete the avatar from storage if it exists
                   if (categoryData?.image_url) {
-                    const fileName = categoryData.image_url.split('/').pop();
+                    const fileName = categoryData.image_url.split("/").pop();
                     if (fileName) {
                       await supabase.storage
-                        .from('category-avatars')
+                        .from("category-avatars")
                         .remove([`category-avatars/${fileName}`]);
                     }
                   }
 
                   await refetchCategories();
-                  Alert.alert('Success', 'Category deleted and products reassigned successfully');
+                  Alert.alert(
+                    "Success",
+                    "Category deleted and products reassigned successfully"
+                  );
                 } catch (error: any) {
-                  Alert.alert('Error', error.message);
+                  Alert.alert("Error", error.message);
                 }
               },
             })),
             {
-              text: 'Cancel',
-              style: 'cancel',
+              text: "Cancel",
+              style: "cancel",
             },
           ]
         );
       } else {
         // No products in this category, proceed with deletion
         const { data: categoryData, error: categoryError } = await supabase
-          .from('categories')
-          .select('image_url')
-          .eq('id', id)
+          .from("categories")
+          .select("image_url")
+          .eq("id", id)
           .single();
 
         if (categoryError) throw categoryError;
 
         const { error: deleteError } = await supabase
-          .from('categories')
+          .from("categories")
           .delete()
-          .eq('id', id);
+          .eq("id", id);
 
         if (deleteError) throw deleteError;
 
         // Delete the avatar from storage if it exists
         if (categoryData?.image_url) {
-          const fileName = categoryData.image_url.split('/').pop();
+          const fileName = categoryData.image_url.split("/").pop();
           if (fileName) {
             await supabase.storage
-              .from('category-avatars')
+              .from("category-avatars")
               .remove([`category-avatars/${fileName}`]);
           }
         }
 
         await refetchCategories();
-        Alert.alert('Success', 'Category deleted successfully');
+        Alert.alert("Success", "Category deleted successfully");
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      Alert.alert("Error", error.message);
     }
   };
 
   useFocusEffect(
     React.useCallback(() => {
       // Refetch data when screen comes into focus
-      refetchProducts();
+      // fetchAllProducts();
       refetchCategories();
     }, [])
   );
@@ -329,10 +346,13 @@ export default function AdminScreen() {
             <CatalogSkeleton count={3} />
           ) : (
             <FlatList
-              data={products}
+              data={allProducts}
               renderItem={renderProductItem}
               keyExtractor={(item) => item.id}
-              contentContainerStyle={[styles.list, { paddingBottom: SPACING.xxl }]}
+              contentContainerStyle={[
+                styles.list,
+                { paddingBottom: SPACING.xxl },
+              ]}
               showsVerticalScrollIndicator={false}
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
@@ -348,7 +368,10 @@ export default function AdminScreen() {
             data={categories}
             renderItem={renderCategoryItem}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={[styles.list, { paddingBottom: SPACING.xxl }]}
+            contentContainerStyle={[
+              styles.list,
+              { paddingBottom: SPACING.xxl },
+            ]}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
@@ -360,7 +383,9 @@ export default function AdminScreen() {
       </View>
 
       <FloatingActionButton
-        onPress={selectedTab === "products" ? handleAddProduct : handleAddCategory}
+        onPress={
+          selectedTab === "products" ? handleAddProduct : handleAddCategory
+        }
         icon={<Plus size={24} color={COLORS.white} />}
       />
     </View>
@@ -370,7 +395,7 @@ export default function AdminScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f6f5ed',
+    backgroundColor: "#f6f5ed",
   },
   tabsContainer: {
     flexDirection: "row",

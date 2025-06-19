@@ -1,7 +1,7 @@
-import { useCallback, useEffect } from "react";
+// app/_layout.tsx
+import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useFonts } from "expo-font";
 import {
   Poppins_400Regular,
   Poppins_500Medium,
@@ -12,18 +12,20 @@ import {
   PlayfairDisplay_400Regular,
   PlayfairDisplay_700Bold,
 } from "@expo-google-fonts/playfair-display";
-import { SplashScreen } from "expo-router";
+import * as SplashScreenLib from "expo-splash-screen";
+import { useCallback, useEffect } from "react";
 import { useFrameworkReady } from "@/hooks/useFrameworkReady";
 import { AuthProvider } from "@/context/AuthContext";
-import * as SplashScreenLib from "expo-splash-screen";
 import { MenuProvider } from "react-native-popup-menu";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-// Prevent automatic splash screen hiding
+// Prevent splash screen auto-hide
 SplashScreenLib.preventAutoHideAsync();
 
 export default function RootLayout() {
+  useFrameworkReady();
+
   const [fontsLoaded, fontError] = useFonts({
     "Poppins-Regular": Poppins_400Regular,
     "Poppins-Medium": Poppins_500Medium,
@@ -32,8 +34,6 @@ export default function RootLayout() {
     "Playfair-Regular": PlayfairDisplay_400Regular,
     "Playfair-Bold": PlayfairDisplay_700Bold,
   });
-
-  useFrameworkReady();
 
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded || fontError) {
@@ -45,23 +45,16 @@ export default function RootLayout() {
     onLayoutRootView();
   }, [onLayoutRootView]);
 
-  // Don't render until fonts are loaded
-  if (!fontsLoaded && !fontError) {
-    return null;
-  }
+  if (!fontsLoaded && !fontError) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
         <MenuProvider>
           <BottomSheetModalProvider>
-            <Stack
-              screenOptions={{
-                headerShown: false,
-              }}
-            >
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen name="(tabs)" />
               <Stack.Screen name="+not-found" options={{ title: "Oops!" }} />
             </Stack>
             <StatusBar style="auto" />

@@ -1,13 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ScrollView, Alert, Text, TouchableOpacity, Image } from 'react-native';
-import { useRouter } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
-import { COLORS, SPACING } from '@/constants/theme';
-import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
-import { supabase } from '@/lib/supabase';
-import { decode } from 'base64-arraybuffer';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  Alert,
+  Text,
+  TouchableOpacity,
+  Image,
+} from "react-native";
+import { useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
+import { COLORS, SPACING } from "@/constants/theme";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import { supabase } from "@/lib/supabase";
+import { decode } from "base64-arraybuffer";
+import { Ionicons } from "@expo/vector-icons";
 
 type Category = {
   id: string;
@@ -15,14 +23,14 @@ type Category = {
 };
 
 export default function AddProductScreen() {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(true);
-  
+
   const router = useRouter();
 
   useEffect(() => {
@@ -32,15 +40,15 @@ export default function AddProductScreen() {
   const fetchCategories = async () => {
     try {
       const { data, error } = await supabase
-        .from('categories')
-        .select('id, name')
-        .order('name');
+        .from("categories")
+        .select("id, name")
+        .order("name");
 
       if (error) throw error;
 
       setCategories(data || []);
     } catch (error: any) {
-      Alert.alert('Error', 'Failed to load categories');
+      Alert.alert("Error", "Failed to load categories");
     } finally {
       setLoadingCategories(false);
     }
@@ -48,20 +56,23 @@ export default function AddProductScreen() {
 
   const pickImage = async () => {
     if (images.length >= 6) {
-      Alert.alert('Error', 'Maximum 6 images allowed');
+      Alert.alert("Error", "Maximum 6 images allowed");
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
+      aspect: [16, 9], // Try a more standard aspect
+      quality: 0.5,
       base64: true,
     });
 
     if (!result.canceled && result.assets[0].base64) {
-      setImages([...images, `data:image/jpeg;base64,${result.assets[0].base64}`]);
+      setImages([
+        ...images,
+        `data:image/jpeg;base64,${result.assets[0].base64}`,
+      ]);
     }
   };
 
@@ -70,53 +81,53 @@ export default function AddProductScreen() {
   };
 
   const toggleCategory = (categoryId: string) => {
-    setSelectedCategories(prev => 
+    setSelectedCategories((prev) =>
       prev.includes(categoryId)
-        ? prev.filter(id => id !== categoryId)
+        ? prev.filter((id) => id !== categoryId)
         : [...prev, categoryId]
     );
   };
 
   const uploadImage = async (base64Image: string) => {
     try {
-      const base64Data = base64Image.split(',')[1];
+      const base64Data = base64Image.split(",")[1];
       const fileName = `${Date.now()}.jpg`;
       const { data, error } = await supabase.storage
-        .from('product-images')
+        .from("product-images")
         .upload(fileName, decode(base64Data), {
-          contentType: 'image/jpeg',
+          contentType: "image/jpeg",
         });
 
       if (error) throw error;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(fileName);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("product-images").getPublicUrl(fileName);
 
       return publicUrl;
     } catch (error: any) {
-      throw new Error('Failed to upload image');
+      throw new Error("Failed to upload image");
     }
   };
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      Alert.alert('Error', 'Please enter a product name');
+      Alert.alert("Error", "Please enter a product name");
       return;
     }
 
     if (!description.trim()) {
-      Alert.alert('Error', 'Please enter a product description');
+      Alert.alert("Error", "Please enter a product description");
       return;
     }
 
     if (images.length === 0) {
-      Alert.alert('Error', 'Please add at least one image');
+      Alert.alert("Error", "Please add at least one image");
       return;
     }
 
     if (selectedCategories.length === 0) {
-      Alert.alert('Error', 'Please select at least one category');
+      Alert.alert("Error", "Please select at least one category");
       return;
     }
 
@@ -128,7 +139,7 @@ export default function AddProductScreen() {
 
       // Create product
       const { data: product, error: productError } = await supabase
-        .from('products')
+        .from("products")
         .insert({
           name: name.trim(),
           description: description.trim(),
@@ -140,20 +151,20 @@ export default function AddProductScreen() {
       if (productError) throw productError;
 
       // Create category relationships
-      const categoryRelations = selectedCategories.map(categoryId => ({
+      const categoryRelations = selectedCategories.map((categoryId) => ({
         product_id: product.id,
         category_id: categoryId,
       }));
 
       const { error: categoryError } = await supabase
-        .from('product_categories')
+        .from("product_categories")
         .insert(categoryRelations);
 
       if (categoryError) throw categoryError;
 
-      Alert.alert('Success', 'Product added successfully', [
+      Alert.alert("Success", "Product added successfully", [
         {
-          text: 'OK',
+          text: "OK",
           onPress: () => {
             // Simply navigate back, the focus effect will handle the refetch
             router.back();
@@ -161,7 +172,7 @@ export default function AddProductScreen() {
         },
       ]);
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      Alert.alert("Error", error.message);
     } finally {
       setLoading(false);
     }
@@ -188,6 +199,7 @@ export default function AddProductScreen() {
           value={description}
           onChangeText={setDescription}
           placeholder="Enter product description"
+          
           multiline
           numberOfLines={4}
           style={styles.description}
@@ -199,25 +211,29 @@ export default function AddProductScreen() {
           <View style={styles.categories}>
             {loadingCategories ? (
               <Text style={styles.loadingText}>Loading categories...</Text>
-            ) : categories.map(category => (
-              <TouchableOpacity
-                key={category.id}
-                style={[
-                  styles.category,
-                  selectedCategories.includes(category.id) && styles.categorySelected,
-                ]}
-                onPress={() => toggleCategory(category.id)}
-              >
-                <Text
+            ) : (
+              categories.map((category) => (
+                <TouchableOpacity
+                  key={category.id}
                   style={[
-                    styles.categoryText,
-                    selectedCategories.includes(category.id) && styles.categoryTextSelected,
+                    styles.category,
+                    selectedCategories.includes(category.id) &&
+                      styles.categorySelected,
                   ]}
+                  onPress={() => toggleCategory(category.id)}
                 >
-                  {category.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={[
+                      styles.categoryText,
+                      selectedCategories.includes(category.id) &&
+                        styles.categoryTextSelected,
+                    ]}
+                  >
+                    {category.name}
+                  </Text>
+                </TouchableOpacity>
+              ))
+            )}
           </View>
         </View>
 
@@ -231,7 +247,11 @@ export default function AddProductScreen() {
                   style={styles.removeImage}
                   onPress={() => removeImage(index)}
                 >
-                  <Ionicons name="close-circle" size={24} color={COLORS.error} />
+                  <Ionicons
+                    name="close-circle"
+                    size={24}
+                    color={COLORS.error}
+                  />
                 </TouchableOpacity>
               </View>
             ))}
@@ -273,18 +293,18 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   label: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: "Poppins-Medium",
     fontSize: 16,
     color: COLORS.textPrimary,
   },
   loadingText: {
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
     fontSize: 14,
     color: COLORS.textSecondary,
   },
   categories: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: SPACING.sm,
   },
   category: {
@@ -298,7 +318,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   categoryText: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: "Poppins-Medium",
     fontSize: 14,
     color: COLORS.primary,
   },
@@ -306,22 +326,22 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
   images: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: SPACING.sm,
   },
   imageContainer: {
     width: 100,
     height: 100,
     borderRadius: 8,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   removeImage: {
-    position: 'absolute',
+    position: "absolute",
     top: 4,
     right: 4,
     backgroundColor: COLORS.white,
@@ -333,11 +353,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 2,
     borderColor: COLORS.primary,
-    borderStyle: 'dashed',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderStyle: "dashed",
+    justifyContent: "center",
+    alignItems: "center",
   },
   button: {
     marginTop: SPACING.xl,
   },
-}); 
+});

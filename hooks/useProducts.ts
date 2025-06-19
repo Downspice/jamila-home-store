@@ -136,7 +136,7 @@ export type Product = {
 //     deleteProduct,
 //   };
 // };
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 20;
 
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -172,23 +172,7 @@ export function useProducts() {
     },
     [hasMore]
   );
-
-  const fetchAllProducts = async () => {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching products:", error.message);
-      return;
-    }
-
-    if (data) {
-      return data;
-    }
-  };
-
+ 
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return;
     setLoading(true);
@@ -224,7 +208,7 @@ export function useProducts() {
   return {
     products,
     allProducts,
-    fetchAllProducts,
+     refetch: fetchProducts, 
     loading,
     refreshing,
     hasMore,
@@ -395,4 +379,58 @@ export const useProductsByCategory = (categoryId: string, limit = 5) => {
   }, [categoryId, limit]);
 
   return { products, loading, error };
+};
+
+
+// Fetch all products without pagination
+export const useAllProducts = () => {
+  const [allProducts, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchAllProducts = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select(
+            `
+            *,
+            product_categories (
+              categories (id, name)
+            )
+          `
+          )
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        const formattedProducts = (data || []).map((item: any) => {
+          const categories = (item.product_categories || []).map((pc: any) => ({
+            id: pc.categories.id,
+            name: pc.categories.name,
+          }));
+
+          return {
+            ...item,
+            categories,
+          };
+        });
+
+        setProducts(formattedProducts);
+      } catch (error: any) {
+        console.error("Error fetching all products:", error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllProducts();
+  }, []);
+
+  return { allProducts, loading, error };
 };

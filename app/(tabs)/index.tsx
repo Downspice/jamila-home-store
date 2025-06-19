@@ -118,14 +118,12 @@ export default function HomeScreen() {
           />
         }
       >
-        <View style={styles.content}>
-          <View style={styles.backgroundContainer}>
-            <ImageBackground
+        {/* <ImageBackground
               source={require("@/assets/images/building.jpg")}
               resizeMode="cover"
               style={[styles.backgroundImagePattern, { opacity: 0.1 }]}
-            />
-          </View>
+            > */}
+        <View style={styles.content}> 
           <Animated.View
             entering={FadeInDown.delay(200).springify()}
             style={styles.section}
@@ -214,7 +212,9 @@ export default function HomeScreen() {
             /> */}
           </Animated.View>
         </View>
+        {/* </ImageBackground> */}
       </ScrollView>
+      
     </View>
   );
 }
@@ -231,6 +231,8 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     height: "100%",
+    opacity: 0.1,
+    zIndex:-2
   },
   container: {
     flex: 1,

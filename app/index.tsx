@@ -1,18 +1,23 @@
-import { useEffect, useState } from 'react';
-import { Redirect } from 'expo-router';
-import { View, StyleSheet } from 'react-native';
-import AnimatedSplashScreen from '@/components/shared/AnimatedSplashScreen';
+import { useEffect, useState } from "react";
+import { Redirect, useRouter } from "expo-router";
+import { View, StyleSheet } from "react-native";
+import AnimatedSplashScreen from "@/components/shared/AnimatedSplashScreen";
 
 export default function Index() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  // useEffect(() => {
+  //   // For demo purposes, we'll show the splash screen for a minimum time
+  //   const timeout = setTimeout(() => {
+  //     setIsLoading(false);
+  //   }, 2500);
+
+  //   return () => clearTimeout(timeout);
+  // }, []);
 
   useEffect(() => {
-    // For demo purposes, we'll show the splash screen for a minimum time
-    const timeout = setTimeout(() => {
-      setIsLoading(false);
-    }, 2500);
-
-    return () => clearTimeout(timeout);
+    router.replace("/(onboarding)/screen1");
   }, []);
 
   if (isLoading) {

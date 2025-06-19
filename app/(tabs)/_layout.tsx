@@ -9,7 +9,7 @@ import { Home, Grid, Heart, Bookmark, User, Search } from 'lucide-react-native';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { isAdmin } = useAuth();
-  console.log("isAdmin", isAdmin);
+  // console.log("isAdmin", isAdmin);
 
   if(!isAdmin) {
   return ( 
