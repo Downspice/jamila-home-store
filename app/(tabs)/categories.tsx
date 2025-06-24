@@ -8,6 +8,7 @@ import {
   RefreshControl,
   FlatList,
   useWindowDimensions,
+  ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
@@ -59,6 +60,16 @@ export default function CategoriesScreen() {
   return (
     <View style={styles.container}>
       <Header title="Categories" />
+      <ScrollView
+              showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  tintColor={COLORS.primary}
+                />
+              }
+            >
       <View style={styles.productsGrid}>
         {categories.map((category, index) => (
           <View
@@ -67,6 +78,7 @@ export default function CategoriesScreen() {
               width: cardWidth,
               marginBottom: SPACING.md,
               marginRight: (index + 1) % numColumns === 0 ? 0 : cardSpacing,
+                
             }}
           >
             <CategoryCard
@@ -81,6 +93,7 @@ export default function CategoriesScreen() {
         ))}
         {categoriesLoading ? <CategorySkeleton count={4} /> : null}
       </View>
+      </ScrollView>
     </View>
   );
 }
@@ -151,6 +164,7 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xxl,
   },
   productsGrid: {
+    flex:1,
     flexDirection: "row",
     flexWrap: "wrap",
     paddingHorizontal: SPACING.lg,
@@ -158,6 +172,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
-    elevation: 5, //
+    elevation: 5, 
   },
 });
