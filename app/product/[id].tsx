@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
   },
   actionsContainer: {
     position: "absolute",
-    bottom: 14,
+    bottom: 32,
     left: "15%",
     right: "15%",
     flexDirection: "row",
