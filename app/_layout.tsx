@@ -21,7 +21,7 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // Prevent splash screen auto-hide
-SplashScreenLib.preventAutoHideAsync();
+// SplashScreenLib.preventAutoHideAsync();
 
 export default function RootLayout() {
   useFrameworkReady();

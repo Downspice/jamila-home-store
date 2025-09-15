@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "jamila",
-    "slug": "jamila",
+    "slug": "jamilahome-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "jamila-catalog",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -21,12 +21,25 @@
       "favicon": "./assets/images/favicon.png"
     },
     "android": {
+      "supportsTablet": true,
       "package": "com.jamilaHome.catalog"
     },
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#232323",
+          "image": "./assets/images/logo.png",
+          "dark": {
+            "image": "./assets/images/logo.png",
+            "backgroundColor": "#000000"
+          },
+          "imageWidth": 200
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -34,9 +47,16 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "d21f639d-206b-4878-b23b-13445e76ec6e"
+        "projectId": "7740300f-cd1a-4cff-8d0e-330cbacfcc6a"
       }
     },
-    "owner": "dspice"
+    "submit": {
+      "production": {
+        "android": {
+          "serviceAccountKeyPath": "./jamila-key.json"
+        }
+      }
+    },
+    "owner": "jamilahome"
   }
 }

@@ -136,7 +136,7 @@ export type Product = {
 //     deleteProduct,
 //   };
 // };
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 170;
 
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -165,18 +165,18 @@ export function useProducts() {
       }
 
       if (data) {
-        console.log(data.length);
+        console.log("the data lenght",data.length);
         setProducts((prev) => (isRefresh ? data : [...prev, ...data]));
         setHasMore(data.length === PAGE_SIZE);
       }
     },
     [hasMore]
   );
- 
+
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return;
     setLoading(true);
-    const nextPage = page + 1;
+    const nextPage = page + 2;
     await fetchProducts(nextPage);
     setPage(nextPage);
     setLoading(false);
@@ -208,7 +208,7 @@ export function useProducts() {
   return {
     products,
     allProducts,
-     refetch: fetchProducts, 
+    refetch: fetchProducts,
     loading,
     refreshing,
     hasMore,
@@ -380,7 +380,6 @@ export const useProductsByCategory = (categoryId: string, limit = 5) => {
 
   return { products, loading, error };
 };
-
 
 // Fetch all products without pagination
 export const useAllProducts = () => {

@@ -16,6 +16,7 @@ import { COLORS, SPACING } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import GoogleSigninButtonComponent from "@/loginComponenets/googleSignIn";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -110,7 +111,7 @@ export default function LoginScreen() {
                 )}
               </View>
             </TouchableOpacity>
-
+            {/* <GoogleSigninButtonComponent /> */}
             <View style={styles.footer}>
               <Text style={styles.footerText}>
                 Don't have an account?
@@ -124,7 +125,10 @@ export default function LoginScreen() {
               </Text>
 
               <Text style={styles.footerText}>
-                <Text style={styles.linkText} onPress={() => router.push("/(tabs)")}>
+                <Text
+                  style={styles.linkText}
+                  onPress={() => router.push("/(tabs)")}
+                >
                   I’ll sign in later
                 </Text>
               </Text>
@@ -212,10 +216,10 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     padding: SPACING.md,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
-    backdropFilter: "blur(10px)",
+    // shadowOpacity: 0.15,
+    // shadowRadius: 12,
+    // elevation: 6,
+    // backdropFilter: "blur(10px)",
     position: "absolute",
     bottom: 2,
     alignSelf: "center",

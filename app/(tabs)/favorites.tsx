@@ -5,6 +5,8 @@ import {
   Text,
   ScrollView,
   RefreshControl,
+  useWindowDimensions,
+  FlatList,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
@@ -21,7 +23,7 @@ import UnAuthenticatedScreen from "@/components/ui/UnauthenticatedScreen";
 export default function FavoritesScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const { fetchAllProducts, loading } = useProducts();
+  const { products, loading } = useProducts();
   const {
     likedProducts,
     loading: likesLoading,
@@ -34,28 +36,29 @@ export default function FavoritesScreen() {
     isProcessing,
   } = useLikes();
 
-const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    const loadProducts = async () => {
-      const data = await fetchAllProducts();
-      if (data) setProducts(data);
-    };
-
-    loadProducts();
-  }, []);
+   const { width: screenWidth } = useWindowDimensions();
+   const minCardWidth = 200;
+   const cardSpacing = SPACING.md;
+   const horizontalPadding = SPACING.lg * 2;
+   const availableWidth = screenWidth - horizontalPadding;
+   const numColumns = Math.max(
+     2,
+     Math.floor(availableWidth / (minCardWidth + cardSpacing))
+   );
+   const cardWidth =
+     (availableWidth - cardSpacing * (numColumns - 1)) / numColumns;
+ 
 
   let likedProductsList: typeof products = [];
 
-if (products && likedProducts && Array.isArray(likedProducts)) {
-  // console.log("all products:", products);
-  likedProductsList = products.filter((product) => {
-    const isLiked = likedProducts.includes(product.id);
-    // console.log(`Product ${product.id} is liked: ${isLiked}`);
-    return isLiked;
-  });
-}
-
+  if (products && likedProducts && Array.isArray(likedProducts)) {
+    // console.log("all products:", products);
+    likedProductsList = products.filter((product) => {
+      const isLiked = likedProducts.includes(product.id);
+      // console.log(`Product ${product.id} is liked: ${isLiked}`);
+      return isLiked;
+    });
+  }
 
   const handleProductPress = (id: string) => {
     router.push(`/product/${id}`);
@@ -95,12 +98,85 @@ if (products && likedProducts && Array.isArray(likedProducts)) {
   //   );
   // }
 
+  // return (
+  //   <View style={styles.container}>
+  //     <Header title="Favorites" />
+  //     <ScrollView
+  //       style={styles.content}
+  //       showsVerticalScrollIndicator={false}
+  //       refreshControl={
+  //         <RefreshControl
+  //           refreshing={refreshing}
+  //           onRefresh={onRefresh}
+  //           tintColor={COLORS.primary}
+  //         />
+  //       }
+  //     >
+  //       <View style={styles.grid}>
+  //         {likesLoading ?? <ProductSkeleton />}
+  //         {likedProductsList
+  //           ? likedProductsList.map((product, index) => (
+  //               <Animated.View
+  //                 key={product.id + index}
+  //                 entering={FadeInDown.delay(index * 100).springify()}
+  //               >
+  //                 <ProductCard
+  //                   key={product.id}
+  //                   id={product.id}
+  //                   name={product.name}
+  //                   images={product.images}
+  //                   isLiked={true}
+  //                   onPress={() => handleProductPress(product.id)}
+  //                   style={styles.productCard}
+  //                   index={index}
+  //                   likeCount={getLikeCount(product.id)}
+  //                   onLike={() => toggleLike(product.id)}
+  //                   disabled={isProcessing(product.id)} // optional if you want to block spam
+  //                 />
+  //               </Animated.View>
+  //             ))
+  //           : null}
+  //       </View>
+  //     </ScrollView>
+  //   </View>
+  // );
+
+  const renderItem = ({ item, index }: any) => (
+    <Animated.View
+      key={item.id + index}
+      entering={FadeInDown.delay(index * 100).springify()}
+      style={{
+        width: cardWidth,
+        marginBottom: SPACING.md,
+        marginRight: (index + 1) % numColumns === 0 ? 0 : cardSpacing,
+      }}
+    >
+      <ProductCard
+        id={item.id}
+        name={item.name}
+        images={item.images}
+        likeCount={getLikeCount(item.id)}
+        isLiked={true}
+        onPress={() => handleProductPress(item.id)}
+        onLike={() => toggleLike(item.id)}
+        disabled={isProcessing(item.id)}
+      />
+    </Animated.View>
+  )
+
   return (
     <View style={styles.container}>
       <Header title="Favorites" />
-      <ScrollView
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
+      <FlatList
+        data={likedProductsList || []}
+        keyExtractor={(item, index) => item.id + index}
+        numColumns={numColumns}
+        renderItem={renderItem}
+        contentContainerStyle={{
+          paddingHorizontal: SPACING.lg,
+          paddingTop: SPACING.md,
+          paddingBottom: SPACING.xl,
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -108,33 +184,29 @@ if (products && likedProducts && Array.isArray(likedProducts)) {
             tintColor={COLORS.primary}
           />
         }
-      >
-        <View style={styles.grid}>
-          {likesLoading ?? <ProductSkeleton />}
-          {likedProductsList? likedProductsList.map((product, index) => (
-            <Animated.View
-              key={product.id}
-              entering={FadeInDown.delay(index * 100).springify()}
-            >
-              <ProductCard
-                key={product.id}
-                id={product.id}
-                name={product.name}
-                images={product.images}
-                isLiked={true}
-                onPress={() => handleProductPress(product.id)}
-                style={styles.productCard}
-                index={index}
-                likeCount={getLikeCount(product.id)}
-                onLike={() => toggleLike(product.id)}
-                disabled={isProcessing(product.id)} // optional if you want to block spam
-              />
-            </Animated.View>
-          )): null}
-        </View>
-      </ScrollView>
+        ListEmptyComponent={
+          likesLoading ? (
+            <ProductSkeleton />
+          ) : (
+            <Text style={{ textAlign: "center", marginTop: 40 }}>
+              No liked products yet.
+            </Text>
+          )
+        }
+        // onEndReached={() => {
+        //   if (hasMore && !loading) {
+        //     loadMore()
+        //   }
+        // }}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          loading ? (
+            <Text style={{ textAlign: "center", padding: 16 }}>Loading...</Text>
+          ) : null
+        }
+      />
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -153,7 +225,7 @@ const styles = StyleSheet.create({
   },
   productCard: {
     flex: 1,
-    margin: SPACING.xs,
+    margin: SPACING.sm,
     width: 160,
     maxWidth: "100%",
   },

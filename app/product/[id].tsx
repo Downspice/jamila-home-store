@@ -284,7 +284,6 @@ export default function ProductDetailScreen() {
           <Text style={styles.description}>{product?.description}</Text>
         </View>
       </ScrollView>
-
       <View style={styles.actionsContainer}>
         <TouchableOpacity
           onPress={() => setShowCatalogSheet(true)}

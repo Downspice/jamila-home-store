@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -6,27 +6,20 @@ import {
   RefreshControl,
   useWindowDimensions,
 } from "react-native";
-import { useRouter, useFocusEffect } from "expo-router";
+import { useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
 import { useProducts } from "@/hooks/useProducts";
 import { useCategories } from "@/hooks/useCategories";
 import { useLikes } from "@/hooks/useLikes";
 import ProductCard from "@/components/ui/ProductCard";
-import CategoryCard from "@/components/ui/CategoryCard";
-import CategorySkeleton from "@/components/ui/CategorySkeleton";
-import { CategorySection } from "@/components/CategorySection";
-import Header from "@/components/shared/Header";
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 export default function AllProducts() {
   const router = useRouter();
   const { width: screenWidth } = useWindowDimensions();
-
   const { products, loading, refreshing, onRefresh, loadMore, hasMore } =
     useProducts();
   const { categories, loading: categoriesLoading } = useCategories();
   const { isLiked, getLikeCount, toggleLike, isProcessing } = useLikes();
-
   const minCardWidth = 200;
   const cardSpacing = SPACING.md;
   const horizontalPadding = SPACING.lg * 2;
@@ -50,7 +43,7 @@ export default function AllProducts() {
       }}
     >
       <ProductCard
-        id={item.id}
+        id={item.id + index }
         name={item.name}
         images={item.images}
         likeCount={getLikeCount(item.id)}
@@ -66,7 +59,7 @@ export default function AllProducts() {
     <View style={{ flex: 1 }}> 
       <FlatList
         data={products}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item,index) => item.id + index}
         numColumns={numColumns}
         renderItem={renderItem}
         contentContainerStyle={{

@@ -61,38 +61,37 @@ export default function CategoriesScreen() {
     <View style={styles.container}>
       <Header title="Categories" />
       <ScrollView
-              showsVerticalScrollIndicator={false}
-              refreshControl={
-                <RefreshControl
-                  refreshing={refreshing}
-                  onRefresh={onRefresh}
-                  tintColor={COLORS.primary}
-                />
-              }
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={COLORS.primary}
+          />
+        }
+      >
+        <View style={styles.productsGrid}>
+          {categories.map((category, index) => (
+            <View
+              key={category.id}
+              style={{
+                width: cardWidth,
+                marginBottom: SPACING.md,
+                marginRight: (index + 1) % numColumns === 0 ? 0 : cardSpacing,
+              }}
             >
-      <View style={styles.productsGrid}>
-        {categories.map((category, index) => (
-          <View
-            key={category.id}
-            style={{
-              width: cardWidth,
-              marginBottom: SPACING.md,
-              marginRight: (index + 1) % numColumns === 0 ? 0 : cardSpacing,
-                
-            }}
-          >
-            <CategoryCard
-              id={category.id}
-              name={category.name}
-              image={category.image_url}
-              onPress={() => handleCategoryPress(category.id)}
-              index={index}
-              style={{ margin: 10 }}
-            />
-          </View>
-        ))}
-        {categoriesLoading ? <CategorySkeleton count={4} /> : null}
-      </View>
+              <CategoryCard
+                id={category.id}
+                name={category.name}
+                image={category.image_url}
+                onPress={() => handleCategoryPress(category.id)}
+                index={index}
+                style={{ margin: 10 }}
+              />
+            </View>
+          ))}
+          {categoriesLoading ? <CategorySkeleton count={4} /> : null}
+        </View>
       </ScrollView>
     </View>
   );
@@ -164,7 +163,7 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xxl,
   },
   productsGrid: {
-    flex:1,
+    flex: 1,
     flexDirection: "row",
     flexWrap: "wrap",
     paddingHorizontal: SPACING.lg,
@@ -172,6 +171,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
-    elevation: 5, 
+    elevation: 5,
   },
 });

@@ -28,26 +28,30 @@ const onboardingData = [
     id: 2,
     title: "Explore handpicked collections for every room.",
     description: "Save your favorites and build your own catalog.",
-    image: require("@/assets/images/onboarding1.png"),
+    image: require("@/assets/images/onboarding2.png"),
     backgroundColor: "#4ECDC4",
   },
   {
     id: 3,
     title: "Like, share, and vote for what inspires you.",
     description: "Your voice helps shape our next collection.",
-    image: require("@/assets/images/onboarding1.png"),
+    image: require("@/assets/images/onboarding3.png"),
     backgroundColor: "#15535C",
   },
   {
     id: 4,
     title: "Let’s find the perfect piece for your home.",
     description: "Start exploring now.",
-    image: require("@/assets/images/onboarding1.png"),
+    image: require("@/assets/images/onboarding4.png"),
     backgroundColor: "#15535C",
   },
 ];
 
-export default function OnboardingScreen() {
+export default function OnboardingScreen({
+  onFinish,
+}: {
+  onFinish: () => void;
+}) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -63,6 +67,7 @@ export default function OnboardingScreen() {
     } else {
       console.log("Navigating to HomeScreen");
       router.replace("/login");
+      onFinish();
     }
   };
 
@@ -128,18 +133,13 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#fff",
+    textAlign: "center",
     marginBottom: 10,
   },
   description: {
     fontSize: 18,
     color: "#fff",
-    textAlign: "center",
+    textAlign: "left",
   },
   footer: {
     position: "absolute",

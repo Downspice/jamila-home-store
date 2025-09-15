@@ -7,12 +7,30 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal"
+    }, "local": {
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": true
+      }
     },
-    "preview": {
+    "local2": {
+      "android": {
+        "gradleCommand": ":app:assembleRelease"
+      }
+    },
+    "local3": {
+      "developmentClient": true
+    },
+    "local4": {
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "ANDROID_SDK_ROOT": "/Users/macbook/Library/Android/sdk"
+      }
     }
   },
   "submit": {

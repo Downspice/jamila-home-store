@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "jamila-464112",
+  "private_key_id": "7674f4cb6a33194772173fdc46be47aa3587734d",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDPQrOlmMb4rioh\n1P6Zm+/LN8EW6wqLKBfiHEUQLhAC+Tb32lqcyIuyoko/G3fiqH6gqljLgpoRA7jA\nrQcma9Tjf3wcSNlmHP0JjBW/s4X5rQikawSpRsZaWcuVxaJOZMlJkN08lH9VZBX4\ndKEc4wCl90GvKQye7iyILptrYDwwVB9fiL5QoCo8qxCbsFaosJJOqdadnljl/fl+\nQVETa30lq2XQPOYGigeTQv1ppBkOUH/wpCqP2QgDghV0zRbAgxb2wtjyttG8CfEZ\nbXxrsMHB3zp2IbLB8ZdnLkGSlB4DYYwJWBaP09YAfbOqAvCvGF4Ugfutsj9QIgFD\nmxTJon1/AgMBAAECggEADh50n3zLXSh8LUbVu0Agsz7OlBGZ68Xk7p3PZJ1GsPUq\nNfM1hgWxYo9ksGzeG14wFiDUoLR6a1tODC4dVRQ2cfL+0Oxzht3FrQ9Scfc4Urxj\nYNP7gs6T95azZDYM6vs5rR3FvHk/PWFuj7jeOtoJ8sRnwJdyySbfeL14D/YD06Tf\n/xTqQp4kWf8yJdP0jQFCVYrOil/NIYZ6FaBKjOWPawP8hKZhzMeCZl9xazKmJQVr\nI8O36HWmGqFHJxvCm8KcAwiGytCE/RA/WFqh3i3lC0zcWoHqteCQ/kO3zKNRp9ri\n0AHWzrHC+Z0IHFqQq+xD47WovQzJQQjKkvE1ooG9bQKBgQDwKgliJI+IUIT65jhM\nfx6KL3n4Q+43xHEXkq55jLtR4lCC56rWLypFNSSUxF62IBIWWk+x7zMAUGgEycqy\nFHFsTl0xdUyg4gsHscUT+PGS7ePRaghYhUPzP4qY0i7LRU2x0zTIYtpM7Zqgv1IT\n97gN8SKoDmr5kJEMyLOIumij6wKBgQDc7UCqnPJjAtpqK9C5klCsA7Zi6bWpnPie\n0zXwX26GHa/zPi/PfsOb11GKWqqLohdL5xMXn+ZdAeU808iyDZC4H/OOICGjA2Hy\nABJ6AWWTDKQDcjVSkKrWxKf8GvWiYSdWu+9dZdpyX7H6GDWxFI8zRK9SFzTKiEIM\nF19bc0srvQKBgF/7bOScWADSrVLYz4dDBqGTd9uQypPfHpOdO724UOTY3fRzQgN3\nth0SsBwEnxWKm6/zSAaE4o0tlWTUgP3KzcnLR9OMXaOus1nP4kOpKmLeUD5RciRu\nnkmJC4sn9Sun9vUqw92SJEy6aSH1VIhGaHip9n/Tw00aSd4iGB584XUhAoGAFvJR\nkCcDCgOm2fY5FL08wdEU5YsuwjI6pIx9grz2xtlYiCRCZQPen1Yq8vrd0ekBEHIs\nynxiOfDTdZDtvIiqKmWvL2jo9XyJdNBLGv8AJNjgRDddkHjUNcBxTj8imj4LDvgw\nMXw9xzlnS/mtwfnHseSFbTpZ0lt6uLTIw7/i4+UCgYB0xI1R7PC0WQg2JuBhvW7Z\nGetHuXEZgA7ZX4+AIo81GV5N6PqR/QgIDZifO1jap8rfi+0do6FmAxp2WZbppKFw\nJd3il3ddGSCbpmQ2dN/QUY4EHrHW8BNilkqJBQDEEXRsWLm/Q7/ZpRX0JL8kGRvc\nPYEzf0YwwxqoKX+Yw+pRKQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "jamilahomedev@jamila-464112.iam.gserviceaccount.com",
+  "client_id": "101203356995114324373",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/jamilahomedev%40jamila-464112.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

@@ -1,14 +1,14 @@
 import React from "react";
 import {
+  RefreshControl,
+  ScrollView,
   StyleSheet,
   View,
-  Text,
-  FlatList,
   useWindowDimensions,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
-import { useProducts } from "@/hooks/useProducts";
+import { useProducts, useProductsByCategory } from "@/hooks/useProducts";
 import { useCategoryDetail } from "@/hooks/useCategories";
 import { useLikes } from "@/hooks/useLikes";
 import ProductCard from "@/components/ui/ProductCard";
@@ -22,7 +22,7 @@ export default function CategoryDetailScreen() {
   const { category, loading: categoryLoading } = useCategoryDetail(
     id as string
   );
-  const { products, loading: productsLoading } = useProducts(id as string);
+  const { products, loading: productsLoading } = useProductsByCategory(id);
   const { toggleLike, isLiked } = useLikes();
   const { width: screenWidth } = useWindowDimensions();
 
@@ -68,36 +68,45 @@ export default function CategoryDetailScreen() {
         showSearch
         onSearchPress={() => router.push("/search")}
       />
-
-      <Animated.View
-        entering={FadeInDown.delay(200).springify()}
-        style={styles.content}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        // refreshControl={
+        // <RefreshControl
+        //   refreshing={refreshing}
+        //   onRefresh={onRefresh}
+        //   tintColor={COLORS.primary}
+        // />
+        // }
       >
-        <View style={styles.productsGrid}>
-          {products.map((product, index) => (
-            <View
-              key={product.id}
-              style={{
-                width: cardWidth,
-                marginBottom: SPACING.md,
-                marginRight: (index + 1) % numColumns === 0 ? 0 : cardSpacing,
-              }}
-            >
-              <ProductCard
-                id={product.id}
-                name={product.name}
-                images={product.images}
-                likeCount={product.like_count}
-                isLiked={isLiked(product.id)}
-                onPress={() => handleProductPress(product.id)}
-                onLike={() => handleLikePress(product.id)}
-                index={index}
-              />
-            </View>
-          ))}
-        </View>
+        <Animated.View
+          entering={FadeInDown.delay(200).springify()}
+          style={styles.content}
+        >
+          <View style={styles.productsGrid}>
+            {products.map((product, index) => (
+              <View
+                key={product.id + index}
+                style={{
+                  width: cardWidth,
+                  marginBottom: SPACING.md,
+                  marginRight: (index + 1) % numColumns === 0 ? 0 : cardSpacing,
+                }}
+              >
+                <ProductCard
+                  id={product.id}
+                  name={product.name}
+                  images={product.images}
+                  likeCount={product.like_count}
+                  isLiked={isLiked(product.id)}
+                  onPress={() => handleProductPress(product.id)}
+                  onLike={() => handleLikePress(product.id)}
+                  index={index}
+                />
+              </View>
+            ))}
+          </View>
 
-        {/* <FlatList
+          {/* <FlatList
           data={products}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
@@ -108,7 +117,7 @@ export default function CategoryDetailScreen() {
             category?.description ? (
               <Text style={styles.description}>
                 {/* {category.description} */}
-        {/* </Text>
+          {/* </Text>
             ) : null
           }
           ListEmptyComponent={
@@ -121,7 +130,8 @@ export default function CategoryDetailScreen() {
             ) : null
           }
         /> */}
-      </Animated.View>
+        </Animated.View>
+      </ScrollView>
     </View>
   );
 }
