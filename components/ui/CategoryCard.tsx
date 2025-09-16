@@ -1,9 +1,8 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeIn, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { COLORS, FONTS, SHADOWS, SPACING } from '@/constants/theme';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { COLORS, FONTS, SPACING } from '@/constants/theme';
 
 interface CategoryCardProps {
   id: string;
@@ -22,66 +21,55 @@ export default function CategoryCard({
   style,
   index = 0,
 }: CategoryCardProps) {
-  const imageUrl = image || 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg';
+  const imageUrl =
+    image || 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg';
 
   return (
-    <Animated.View 
+    <Animated.View
       entering={FadeIn.delay(index * 100).springify()}
       style={[styles.container, style]}
     >
-      <TouchableOpacity 
-        activeOpacity={0.9}
-        onPress={onPress}
-        style={styles.touchable}
-      >
-        <Image
-          source={{ uri: imageUrl }}
-          style={styles.image}
-          contentFit="cover"
-          transition={300}
-        />
-        <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.8)']}
-          style={styles.gradient}
-        >
-          <Text style={styles.name}>{name.toUpperCase()}</Text>
-        </LinearGradient>
-      </TouchableOpacity>  
+      <TouchableOpacity activeOpacity={0.8} onPress={onPress} style={styles.touchable}>
+        <View style={styles.inner}>
+          <Image
+            source={{ uri: imageUrl }}
+            style={styles.image}
+            contentFit="cover"
+            transition={300}
+          />
+          <Text style={styles.name}>{name}</Text>
+        </View>
+      </TouchableOpacity>
     </Animated.View>
   );
 }
 
+const IMAGE_SIZE = 100;
+
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 20,
-    overflow: 'hidden',
-    ...SHADOWS.large,
+    alignItems: 'center',
     margin: SPACING.sm,
-    height: 180,
-    width: 160,
-    backgroundColor: COLORS.white,
+    width: 120,
   },
   touchable: {
-    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inner: {
+    alignItems: 'center',
   },
   image: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 20,
-  },
-  gradient: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '45%',
-    justifyContent: 'flex-end',
-    padding: SPACING.md,
+    width: IMAGE_SIZE,
+    height: IMAGE_SIZE,
+    borderRadius: IMAGE_SIZE / 2, // makes it a perfect circle
+    backgroundColor: COLORS.lightGray, // fallback background
+    marginBottom: 10,
   },
   name: {
-    color: COLORS.white,
-    fontFamily: FONTS.bold,
-    fontSize: 18,
-    letterSpacing: 1,
+    fontSize: 16,
+    fontFamily: FONTS.medium,
+    color: COLORS.text,
+    textAlign: 'center',
   },
 });

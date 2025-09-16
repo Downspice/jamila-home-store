@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -9,7 +9,6 @@ import {
 import { useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
 import { useProducts } from "@/hooks/useProducts";
-import { useCategories } from "@/hooks/useCategories";
 import { useLikes } from "@/hooks/useLikes";
 import ProductCard from "@/components/ui/ProductCard";
 import { useFocusEffect } from '@react-navigation/native';
@@ -99,8 +98,6 @@ export default function AllProducts() {
             <Text style={{ textAlign: "center", padding: 16 }}>Loading...</Text>
           ) : null
         }
-      // ListHeaderComponent={ 
-      // }
       />
     </View>
   );

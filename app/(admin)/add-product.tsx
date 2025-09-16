@@ -199,7 +199,7 @@ export default function AddProductScreen() {
           value={description}
           onChangeText={setDescription}
           placeholder="Enter product description"
-          
+
           multiline
           numberOfLines={4}
           style={styles.description}
@@ -218,7 +218,7 @@ export default function AddProductScreen() {
                   style={[
                     styles.category,
                     selectedCategories.includes(category.id) &&
-                      styles.categorySelected,
+                    styles.categorySelected,
                   ]}
                   onPress={() => toggleCategory(category.id)}
                 >
@@ -226,7 +226,7 @@ export default function AddProductScreen() {
                     style={[
                       styles.categoryText,
                       selectedCategories.includes(category.id) &&
-                        styles.categoryTextSelected,
+                      styles.categoryTextSelected,
                     ]}
                   >
                     {category.name}
