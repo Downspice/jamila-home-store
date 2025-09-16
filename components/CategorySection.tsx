@@ -1,24 +1,33 @@
 import React, { useCallback } from "react";
-import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  StyleSheet,
+} from "react-native";
 import { Link, useFocusEffect, useRouter } from "expo-router";
 import { useProductsByCategory } from "@/hooks/useProducts";
 import { Category, Product } from "@/types";
 import ProductCard from "@/components/ui/ProductCard";
 import { useLikes } from "@/hooks/useLikes";
 import { COLORS, SPACING } from "@/constants/theme";
-import { BlurView } from "expo-blur";
 import { ArrowBigRightDash } from "lucide-react-native";
 
 interface CategorySectionProps {
   category: Category;
 }
 
-export const CategorySection: React.FC<CategorySectionProps> = ({
-  category,
-}) => {
+export const CategorySection: React.FC<CategorySectionProps> = ({ category }) => {
   const router = useRouter();
   const { products, loading } = useProductsByCategory(category.id);
-  const { toggleLike, isLiked, getLikeCount, isProcessing, fetchLikedProducts } = useLikes();
+  const {
+    toggleLike,
+    isLiked,
+    getLikeCount,
+    isProcessing,
+    fetchLikedProducts,
+  } = useLikes();
 
   const handleProductPress = (id: string) => {
     router.push(`/product/${id}`);
@@ -45,8 +54,8 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
       style={styles.card}
       index={index}
       likeCount={getLikeCount(item.id)}
-      onLike={() => toggleLike(item.id)}
-      disabled={isProcessing(item.id)} // optional if you want to block spam
+      onLike={() => handleLikePress(item.id)}
+      disabled={isProcessing(item.id)}
     />
   );
 
@@ -61,86 +70,73 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   );
 
   return (
-    <View style={styles.row}>
-      <View style={styles.container}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>{category.name}</Text>
-          <Link href={`/category/${category.id}`} asChild>
-            <Pressable
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <Text style={styles.seeAllButton}>See More</Text>
-              <ArrowBigRightDash color={COLORS.primary} />
-            </Pressable>
-          </Link>
-        </View>
-
-        <FlatList
-          data={loading ? [1, 2, 3, 4, 5] : products}
-          renderItem={loading ? renderSkeleton : renderProduct}
-          horizontal
-          keyExtractor={(item, index) =>
-            typeof item === "object" ? item.id : index.toString()
-          }
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ padding: 16 }}
-        />
+    <View style={styles.sectionWrapper}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>{category.name}</Text>
+        <Link href={`/category/${category.id}`} asChild>
+          <Pressable style={styles.seeMore}>
+            <Text style={styles.seeAllButton}>See More</Text>
+            <ArrowBigRightDash color={COLORS.primary} size={18} />
+          </Pressable>
+        </Link>
       </View>
+
+      <FlatList
+        data={loading ? [1, 2, 3, 4] : products}
+        renderItem={loading ? renderSkeleton : renderProduct}
+        keyExtractor={(item, index) =>
+          typeof item === "object" ? item.id : `skeleton-${index}`
+        }
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.flatListContent}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  row: {
-    // backgroundColor: COLORS.white, // or another color; must be non-transparent
-    // borderColor: COLORS.screenBackground,
-    // borderWidth: 1,
-    // borderRadius: 12,
-    // padding: 16, // ensures the content is not flush with edges
-    shadowColor: COLORS.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5, // Android shadow
-  },
-  container: {
-    marginBottom: SPACING.sm,
-    // backgroundColor: COLORS.primary + "20",
+  sectionWrapper: {
+    marginBottom: SPACING.lg,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: SPACING.xl,
-    marginBottom: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.sm,
   },
   sectionTitle: {
-    fontFamily: "Playfair-Bold",
     fontSize: 20,
+    fontFamily: "Playfair-Bold",
     color: COLORS.textPrimary,
   },
+  seeMore: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   seeAllButton: {
-    fontFamily: "Poppins-Medium",
     fontSize: 14,
+    fontFamily: "Poppins-Medium",
     color: COLORS.primary,
+    marginRight: 4,
+  },
+  flatListContent: {
+    paddingHorizontal: SPACING.md,
   },
   card: {
     width: 200,
-    marginRight: 16,
+    marginRight: SPACING.md,
   },
   skeletonCard: {
     width: 200,
-    marginRight: 16,
-    borderRadius: 20,
+    borderRadius: 16,
     overflow: "hidden",
     backgroundColor: "#f0f0f0",
+    marginRight: SPACING.md,
   },
   skeletonImage: {
-    height: 200,
+    height: 180,
     backgroundColor: "#e0e0e0",
   },
   skeletonTextContainer: {
@@ -149,9 +145,9 @@ const styles = StyleSheet.create({
   skeletonLineWide: {
     height: 14,
     backgroundColor: "#e0e0e0",
-    marginBottom: 8,
     width: "80%",
     borderRadius: 4,
+    marginBottom: 6,
   },
   skeletonLineShort: {
     height: 12,
