@@ -12,130 +12,6 @@ export type Product = {
   categories?: { id: string; name: string }[];
 };
 
-// Fetch all products (optionally by category and search query)
-// export const useProducts = (categoryId?: string, searchQuery?: string) => {
-//   const [products, setProducts] = useState<Product[]>([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState<string | null>(null);
-//   const [refreshing, setRefreshing] = useState(false);
-
-//   const fetchProducts = useCallback(async () => {
-//     setError(null);
-//     setLoading(true);
-
-//     try {
-//       let query = supabase.from("products").select(`
-//         *,
-//         product_categories!inner (
-//           category_id,
-//           categories (id, name)
-//         )
-//       `);
-
-//       if (categoryId) {
-//         query = query.eq("product_categories.category_id", categoryId);
-//       }
-
-//       if (searchQuery?.trim()) {
-//         query = query.ilike("name", `%${searchQuery}%`);
-//       }
-
-//       const { data, error } = await query;
-
-//       if (error) throw error;
-
-//       const formattedProducts = (data || []).map((item: any) => {
-//         const categories = (item.product_categories || []).map((pc: any) => ({
-//           id: pc.categories.id,
-//           name: pc.categories.name,
-//         }));
-
-//         return {
-//           ...item,
-//           categories,
-//         };
-//       });
-
-//       setProducts(formattedProducts);
-//     } catch (error: any) {
-//       console.error("Error fetching products:", error);
-//       setError(error.message);
-//     } finally {
-//       setLoading(false);
-//       setRefreshing(false);
-//     }
-//   }, [categoryId, searchQuery]);
-
-//   useEffect(() => {
-//     fetchProducts();
-//   }, [fetchProducts]);
-
-//   const onRefresh = useCallback(async () => {
-//     setRefreshing(true);
-//     await fetchProducts();
-//   }, [fetchProducts]);
-
-//   const updateProduct = async (id: string, updates: Partial<Product>) => {
-//     try {
-//       const { data, error } = await supabase
-//         .from("products")
-//         .update(updates)
-//         .eq("id", id)
-//         .select(`
-//           *,
-//           product_categories (
-//             categories (id, name)
-//           )
-//         `)
-//         .single();
-
-//       if (error) throw error;
-
-//       const categories = (data?.product_categories || []).map((pc: any) => ({
-//         id: pc.categories.id,
-//         name: pc.categories.name,
-//       }));
-
-//       const updatedProduct = {
-//         ...data,
-//         categories,
-//       };
-
-//       setProducts((prev) =>
-//         prev.map((product) => (product.id === id ? updatedProduct : product))
-//       );
-//       return { data: updatedProduct };
-//     } catch (error: any) {
-//       console.error("Error updating product:", error);
-//       return { error };
-//     }
-//   };
-
-//   const deleteProduct = async (id: string) => {
-//     try {
-//       const { error } = await supabase.from("products").delete().eq("id", id);
-
-//       if (error) throw error;
-
-//       setProducts((prev) => prev.filter((product) => product.id !== id));
-//       return { success: true };
-//     } catch (error: any) {
-//       console.error("Error deleting product:", error);
-//       return { error };
-//     }
-//   };
-
-//   return {
-//     products,
-//     loading,
-//     error,
-//     refreshing,
-//     onRefresh,
-//     refetch: fetchProducts,
-//     updateProduct,
-//     deleteProduct,
-//   };
-// };
 const PAGE_SIZE = 170;
 
 export function useProducts() {
@@ -165,7 +41,6 @@ export function useProducts() {
       }
 
       if (data) {
-        console.log("the data lenght",data.length);
         setProducts((prev) => (isRefresh ? data : [...prev, ...data]));
         setHasMore(data.length === PAGE_SIZE);
       }
@@ -188,6 +63,7 @@ export function useProducts() {
     setHasMore(true);
     await fetchProducts(0, true);
     setRefreshing(false);
+
   }, [fetchProducts]);
 
   useEffect(() => {
@@ -195,20 +71,23 @@ export function useProducts() {
     setLoading(false);
   }, [fetchProducts]);
 
-  //   const [page, setPage] = useState(1);
-  // const [productsLoadingMore, setProductsLoadingMore] = useState(false);
 
-  // const loadMoreProducts = async () => {
-  //   if (productsLoadingMore) return;
-  //   setProductsLoadingMore(true);
-  //   await fetchMoreProducts(page + 1); // you implement this
-  //   setPage((prev) => prev + 1);
-  //   setProductsLoadingMore(false);
-  // };
+  const refetch = useCallback(async () => {
+    console.log("Refetch called on screen focus");
+    setProducts([]);
+    setPage(0);
+    setHasMore(true);
+    setRefreshing(true);
+    await fetchProducts(0, true);
+    setRefreshing(false);
+  }, [fetchProducts]);
+
+
+
   return {
     products,
     allProducts,
-    refetch: fetchProducts,
+    refetch,
     loading,
     refreshing,
     hasMore,

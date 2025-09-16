@@ -210,7 +210,9 @@ export const useLikes = () => {
     if (fetchError) throw fetchError;
 
     const newCount = Math.max((productData?.like_count || 0) + delta, 0);
+    await fetchLikedProducts();
 
+    
     // const { error: updateError } = await supabase
     //   .from("products")
     //   .update({ like_count: newCount })
@@ -234,6 +236,7 @@ export const useLikes = () => {
     return { error };
   } finally {
     setProcessingIds((prev) => prev.filter((id) => id !== productId));
+    await fetchLikedProducts();
     console.log("likedProducts:", likedProducts);
     
   }
@@ -255,5 +258,6 @@ export const useLikes = () => {
     isProcessing,
     refreshing,
     onRefresh,
+    fetchLikedProducts
   };
 };

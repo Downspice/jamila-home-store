@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
-import { useProductDetail } from "@/hooks/useProducts";
+import { useProductDetail, useProducts } from "@/hooks/useProducts";
 import { useLikes } from "@/hooks/useLikes";
 import { useCatalogs } from "@/hooks/useCatalogs";
 import Header from "@/components/shared/Header";
@@ -50,6 +50,7 @@ export default function ProductDetailScreen() {
   const productIsLiked = product ? likedProducts.includes(product.id) : false;
 
   const handleShareProduct = async () => {
+
     if (!product) return;
 
     try {
@@ -91,7 +92,8 @@ export default function ProductDetailScreen() {
       Alert.alert("Error", "Failed to create catalog");
     }
   };
-
+  const { fetchProducts: refreshingAllProducts } =
+    useProducts();
   const handleLikePress = async () => {
     if (!product) return;
 
@@ -246,7 +248,7 @@ export default function ProductDetailScreen() {
             <Text style={styles.productName}>{product?.name}</Text>
             {/* Categories */}
             <View style={styles.likeContainer}>
-              <TouchableOpacity onPress={() => {}}>
+              <TouchableOpacity onPress={() => { }}>
                 {/* <Heart
                   size={20}
                   color={productIsLiked ? "transparent" : COLORS.textSecondary}

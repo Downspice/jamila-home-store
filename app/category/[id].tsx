@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
   RefreshControl,
   ScrollView,
@@ -6,7 +6,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
 import { useProducts, useProductsByCategory } from "@/hooks/useProducts";
 import { useCategoryDetail } from "@/hooks/useCategories";
@@ -23,7 +23,7 @@ export default function CategoryDetailScreen() {
     id as string
   );
   const { products, loading: productsLoading } = useProductsByCategory(id);
-  const { toggleLike, isLiked } = useLikes();
+  const { toggleLike, isLiked, fetchLikedProducts } = useLikes();
   const { width: screenWidth } = useWindowDimensions();
 
   const handleProductPress = (productId: string) => {
@@ -60,6 +60,11 @@ export default function CategoryDetailScreen() {
   const cardWidth =
     (availableWidth - cardSpacing * (numColumns - 1)) / numColumns;
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchLikedProducts();
+    }, [])
+  );
   return (
     <View style={styles.container}>
       <Header
@@ -70,13 +75,13 @@ export default function CategoryDetailScreen() {
       />
       <ScrollView
         showsVerticalScrollIndicator={false}
-        // refreshControl={
-        // <RefreshControl
-        //   refreshing={refreshing}
-        //   onRefresh={onRefresh}
-        //   tintColor={COLORS.primary}
-        // />
-        // }
+      // refreshControl={
+      // <RefreshControl
+      //   refreshing={refreshing}
+      //   onRefresh={onRefresh}
+      //   tintColor={COLORS.primary}
+      // />
+      // }
       >
         <Animated.View
           entering={FadeInDown.delay(200).springify()}

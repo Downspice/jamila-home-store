@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -8,7 +8,7 @@ import {
   useWindowDimensions,
   FlatList,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
 import { Product, useProducts } from "@/hooks/useProducts";
 import { useLikes } from "@/hooks/useLikes";
@@ -33,21 +33,21 @@ export default function FavoritesScreen() {
     isLiked,
     getLikeCount,
     toggleLike,
-    isProcessing,
+    isProcessing, fetchLikedProducts
   } = useLikes();
 
-   const { width: screenWidth } = useWindowDimensions();
-   const minCardWidth = 200;
-   const cardSpacing = SPACING.md;
-   const horizontalPadding = SPACING.lg * 2;
-   const availableWidth = screenWidth - horizontalPadding;
-   const numColumns = Math.max(
-     2,
-     Math.floor(availableWidth / (minCardWidth + cardSpacing))
-   );
-   const cardWidth =
-     (availableWidth - cardSpacing * (numColumns - 1)) / numColumns;
- 
+  const { width: screenWidth } = useWindowDimensions();
+  const minCardWidth = 200;
+  const cardSpacing = SPACING.md;
+  const horizontalPadding = SPACING.lg * 2;
+  const availableWidth = screenWidth - horizontalPadding;
+  const numColumns = Math.max(
+    2,
+    Math.floor(availableWidth / (minCardWidth + cardSpacing))
+  );
+  const cardWidth =
+    (availableWidth - cardSpacing * (numColumns - 1)) / numColumns;
+
 
   let likedProductsList: typeof products = [];
 
@@ -77,69 +77,12 @@ export default function FavoritesScreen() {
     );
   }
 
-  // if (likedProductsList.length === 0) {
-  //   return (
-  //     <View style={styles.container}>
-  //       <Header title="Favorites" showBackButton={false} />
-  //       <ScrollView
-  //         style={styles.content}
-  //         showsVerticalScrollIndicator={false}
-  //         refreshControl={
-  //           <RefreshControl
-  //             refreshing={refreshing}
-  //             onRefresh={onRefresh}
-  //             tintColor={COLORS.primary}
-  //           />
-  //         }
-  //       >
-  //         <Text style={styles.message}>No favorites yet</Text>
-  //       </ScrollView>
-  //     </View>
-  //   );
-  // }
 
-  // return (
-  //   <View style={styles.container}>
-  //     <Header title="Favorites" />
-  //     <ScrollView
-  //       style={styles.content}
-  //       showsVerticalScrollIndicator={false}
-  //       refreshControl={
-  //         <RefreshControl
-  //           refreshing={refreshing}
-  //           onRefresh={onRefresh}
-  //           tintColor={COLORS.primary}
-  //         />
-  //       }
-  //     >
-  //       <View style={styles.grid}>
-  //         {likesLoading ?? <ProductSkeleton />}
-  //         {likedProductsList
-  //           ? likedProductsList.map((product, index) => (
-  //               <Animated.View
-  //                 key={product.id + index}
-  //                 entering={FadeInDown.delay(index * 100).springify()}
-  //               >
-  //                 <ProductCard
-  //                   key={product.id}
-  //                   id={product.id}
-  //                   name={product.name}
-  //                   images={product.images}
-  //                   isLiked={true}
-  //                   onPress={() => handleProductPress(product.id)}
-  //                   style={styles.productCard}
-  //                   index={index}
-  //                   likeCount={getLikeCount(product.id)}
-  //                   onLike={() => toggleLike(product.id)}
-  //                   disabled={isProcessing(product.id)} // optional if you want to block spam
-  //                 />
-  //               </Animated.View>
-  //             ))
-  //           : null}
-  //       </View>
-  //     </ScrollView>
-  //   </View>
-  // );
+  useFocusEffect(
+    useCallback(() => {
+      fetchLikedProducts();
+    }, [])
+  );
 
   const renderItem = ({ item, index }: any) => (
     <Animated.View

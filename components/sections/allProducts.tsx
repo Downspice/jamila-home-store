@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -12,14 +12,22 @@ import { useProducts } from "@/hooks/useProducts";
 import { useCategories } from "@/hooks/useCategories";
 import { useLikes } from "@/hooks/useLikes";
 import ProductCard from "@/components/ui/ProductCard";
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
 export default function AllProducts() {
   const router = useRouter();
   const { width: screenWidth } = useWindowDimensions();
-  const { products, loading, refreshing, onRefresh, loadMore, hasMore } =
-    useProducts();
-  const { categories, loading: categoriesLoading } = useCategories();
-  const { isLiked, getLikeCount, toggleLike, isProcessing } = useLikes();
+  const {
+    products,
+    loading,
+    refreshing,
+    onRefresh,
+    loadMore,
+    refetch,
+    hasMore,
+  } = useProducts();
+  const { isLiked, getLikeCount, toggleLike, isProcessing, fetchLikedProducts } = useLikes();
   const minCardWidth = 200;
   const cardSpacing = SPACING.md;
   const horizontalPadding = SPACING.lg * 2;
@@ -30,6 +38,13 @@ export default function AllProducts() {
   );
   const cardWidth =
     (availableWidth - cardSpacing * (numColumns - 1)) / numColumns;
+
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchLikedProducts();
+    }, [])
+  );
 
   const handleProductPress = (id: string) => router.push(`/product/${id}`);
 
@@ -43,7 +58,7 @@ export default function AllProducts() {
       }}
     >
       <ProductCard
-        id={item.id + index }
+        id={item.id + index}
         name={item.name}
         images={item.images}
         likeCount={getLikeCount(item.id)}
@@ -56,10 +71,10 @@ export default function AllProducts() {
   );
 
   return (
-    <View style={{ flex: 1 }}> 
+    <View style={{ flex: 1 }}>
       <FlatList
-        data={products}
-        keyExtractor={(item,index) => item.id + index}
+        data={refreshing ? [] : products}
+        keyExtractor={(item, index) => item.id + index}
         numColumns={numColumns}
         renderItem={renderItem}
         contentContainerStyle={{
@@ -80,12 +95,12 @@ export default function AllProducts() {
           />
         }
         ListFooterComponent={
-          loading ? (
+          loading || refreshing ? (
             <Text style={{ textAlign: "center", padding: 16 }}>Loading...</Text>
           ) : null
         }
-        // ListHeaderComponent={ 
-        // }
+      // ListHeaderComponent={ 
+      // }
       />
     </View>
   );

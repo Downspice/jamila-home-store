@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   View,
@@ -29,14 +29,15 @@ export default function HomeScreen() {
   const router = useRouter();
   const { width: screenWidth } = useWindowDimensions();
 
-  const { products, loading, refreshing, onRefresh, loadMore, hasMore } =
+  const { products, loading, refreshing, onRefresh, loadMore, hasMore, refetch } =
     useProducts();
   // console.log(
   //   "Products:",
   //   products.forEach((product) => console.log(product.name))
   // );
+
   const { categories, loading: categoriesLoading } = useCategories();
-  const { isLiked, getLikeCount, toggleLike, isProcessing } = useLikes();
+  const { isLiked, getLikeCount, toggleLike, isProcessing, fetchLikedProducts } = useLikes();
 
   const minCardWidth = 200;
   const cardSpacing = SPACING.md;
@@ -54,6 +55,11 @@ export default function HomeScreen() {
   const handleCategoryPress = (id: string) => router.push(`/category/${id}`);
   const handleLikePress = async (id: string) => await toggleLike(id);
   // Preload and cache images
+  useFocusEffect(
+    useCallback(() => {
+      fetchLikedProducts();
+    }, [])
+  );
   useEffect(() => {
     if (products) {
       products.forEach((product) => {
@@ -123,7 +129,7 @@ export default function HomeScreen() {
               resizeMode="cover"
               style={[styles.backgroundImagePattern, { opacity: 0.1 }]}
             > */}
-        <View style={styles.content}> 
+        <View style={styles.content}>
           <Animated.View
             entering={FadeInDown.delay(200).springify()}
             style={styles.section}
@@ -167,7 +173,7 @@ export default function HomeScreen() {
                 <Text style={styles.seeAllButton}>See All</Text>
               </TouchableOpacity> */}
             </View>
-            <AllProducts/>
+            <AllProducts />
             {/* <FlatList
               data={products}
               keyExtractor={(item) => item.id}
@@ -214,7 +220,7 @@ export default function HomeScreen() {
         </View>
         {/* </ImageBackground> */}
       </ScrollView>
-      
+
     </View>
   );
 }
@@ -232,7 +238,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     opacity: 0.1,
-    zIndex:-2
+    zIndex: -2
   },
   container: {
     flex: 1,

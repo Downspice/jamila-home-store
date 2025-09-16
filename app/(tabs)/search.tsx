@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -10,7 +10,7 @@ import {
   TextInput,
   useWindowDimensions,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
 import { useSearch } from "@/hooks/useSearch";
 import Header from "@/components/shared/Header";
@@ -47,11 +47,16 @@ export default function SearchScreen() {
   const clearSearch = () => {
     setQuery("");
   };
-  const { toggleLike, isLiked, getLikeCount, isProcessing  } = useLikes();
+  const { toggleLike, isLiked, getLikeCount, isProcessing, fetchLikedProducts } = useLikes();
   const handleLikePress = async (id: string) => {
     await toggleLike(id);
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchLikedProducts();
+    }, [])
+  );
   return (
     <View style={styles.container}>
       <Header title="Search" />
@@ -124,13 +129,13 @@ export default function SearchScreen() {
                       key={product.id}
                       id={product.id}
                       name={product.name}
-                      images={product.images} 
+                      images={product.images}
                       isLiked={isLiked(product.id)}
                       onPress={() => handleProductPress(product.id)}
-                      index={index} 
-                likeCount={getLikeCount(product.id)}
-                onLike={() => toggleLike(product.id)}
-                disabled={isProcessing(product.id)} 
+                      index={index}
+                      likeCount={getLikeCount(product.id)}
+                      onLike={() => toggleLike(product.id)}
+                      disabled={isProcessing(product.id)}
                     />
                   </TouchableOpacity>
                 </Animated.View>

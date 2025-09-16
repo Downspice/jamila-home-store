@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
 import { useCatalogDetail } from "@/hooks/useCatalogs";
 import ProductCard from "@/components/ui/ProductCard";
@@ -22,7 +22,7 @@ import { useLikes } from "@/hooks/useLikes";
 export default function CatalogDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const { isLiked, getLikeCount, toggleLike, isProcessing } = useLikes();
+  const { isLiked, getLikeCount, toggleLike, isProcessing, fetchLikedProducts } = useLikes();
   const { catalog, loading, removeProductFromCatalog, renameCatalog } =
     useCatalogDetail(id as string);
 
@@ -32,6 +32,12 @@ export default function CatalogDetailScreen() {
   const handleProductPress = (productId: string) => {
     router.push(`/product/${productId}`);
   };
+  
+  useFocusEffect(
+    useCallback(() => {
+      fetchLikedProducts();
+    }, [])
+  );
 
   const handleRemoveProduct = async (productId: string) => {
     Alert.alert(

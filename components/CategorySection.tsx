@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
-import { Link, useRouter } from "expo-router";
+import { Link, useFocusEffect, useRouter } from "expo-router";
 import { useProductsByCategory } from "@/hooks/useProducts";
 import { Category, Product } from "@/types";
 import ProductCard from "@/components/ui/ProductCard";
@@ -18,11 +18,17 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
 }) => {
   const router = useRouter();
   const { products, loading } = useProductsByCategory(category.id);
-  const { toggleLike, isLiked, getLikeCount, isProcessing } = useLikes();
+  const { toggleLike, isLiked, getLikeCount, isProcessing, fetchLikedProducts } = useLikes();
 
   const handleProductPress = (id: string) => {
     router.push(`/product/${id}`);
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchLikedProducts();
+    }, [])
+  );
 
   const handleLikePress = async (id: string) => {
     await toggleLike(id);
