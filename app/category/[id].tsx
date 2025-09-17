@@ -5,10 +5,12 @@ import {
   StyleSheet,
   View,
   useWindowDimensions,
+  Text,
+  Platform,
 } from "react-native";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
-import { useProducts, useProductsByCategory } from "@/hooks/useProducts";
+import { useProductsByCategory } from "@/hooks/useProducts";
 import { useCategoryDetail } from "@/hooks/useCategories";
 import { useLikes } from "@/hooks/useLikes";
 import ProductCard from "@/components/ui/ProductCard";
@@ -19,10 +21,8 @@ export default function CategoryDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
 
-  const { category, loading: categoryLoading } = useCategoryDetail(
-    id as string
-  );
-  const { products, loading: productsLoading } = useProductsByCategory(id);
+  const { category } = useCategoryDetail(id as string);
+  const { products } = useProductsByCategory(id);
   const { toggleLike, isLiked, fetchLikedProducts } = useLikes();
   const { width: screenWidth } = useWindowDimensions();
 
@@ -33,20 +33,6 @@ export default function CategoryDetailScreen() {
   const handleLikePress = async (productId: string) => {
     await toggleLike(productId);
   };
-
-  // const renderItem = ({ item, index }: any) => (
-  //   <ProductCard
-  //     id={item.id}
-  //     name={item.name}
-  //     images={item.images}
-  //     likeCount={item.like_count}
-  //     isLiked={isLiked(item.id)}
-  //     onPress={() => handleProductPress(item.id)}
-  //     onLike={() => handleLikePress(item.id)}
-  //     style={styles.productCard}
-  //     index={index}
-  //   />
-  // );
 
   // Responsive Grid Logic
   const minCardWidth = 200;
@@ -65,6 +51,7 @@ export default function CategoryDetailScreen() {
       fetchLikedProducts();
     }, [])
   );
+
   return (
     <View style={styles.container}>
       <Header
@@ -73,18 +60,21 @@ export default function CategoryDetailScreen() {
         showSearch
         onSearchPress={() => router.push("/search")}
       />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
-      // refreshControl={
-      // <RefreshControl
-      //   refreshing={refreshing}
-      //   onRefresh={onRefresh}
-      //   tintColor={COLORS.primary}
-      // />
-      // }
+        decelerationRate="fast"
+        overScrollMode="never"
+        // refreshControl={
+        //   <RefreshControl
+        //     refreshing={refreshing}
+        //     onRefresh={onRefresh}
+        //     tintColor={COLORS.primary}
+        //   />
+        // }
       >
         <Animated.View
-          entering={FadeInDown.delay(200).springify()}
+          entering={FadeInDown.delay(200).springify().damping(15).stiffness(100)}
           style={styles.content}
         >
           <View style={styles.productsGrid}>
@@ -94,7 +84,9 @@ export default function CategoryDetailScreen() {
                 style={{
                   width: cardWidth,
                   marginBottom: SPACING.md,
-                  marginRight: (index + 1) % numColumns === 0 ? 0 : cardSpacing,
+                  marginRight:
+                    (index + 1) % numColumns === 0 ? 0 : cardSpacing,
+                  marginHorizontal: cardSpacing / 2,
                 }}
               >
                 <ProductCard
@@ -110,31 +102,6 @@ export default function CategoryDetailScreen() {
               </View>
             ))}
           </View>
-
-          {/* <FlatList
-          data={products}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={
-            category?.description ? (
-              <Text style={styles.description}>
-                {/* {category.description} */}
-          {/* </Text>
-            ) : null
-          }
-          ListEmptyComponent={
-            !productsLoading ? (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>
-                  No products found in this category
-                </Text>
-              </View>
-            ) : null
-          }
-        /> */}
         </Animated.View>
       </ScrollView>
     </View>
@@ -148,10 +115,9 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    // padding: SPACING.lg,
   },
   description: {
-    fontFamily: "Poppins-Regular",
+    fontFamily: Platform.OS === 'android' ? "Poppins-Regular" : "Poppins",
     fontSize: 16,
     color: COLORS.textSecondary,
     marginBottom: SPACING.xl,
@@ -165,7 +131,7 @@ const styles = StyleSheet.create({
     padding: SPACING.xxl,
   },
   emptyText: {
-    fontFamily: "Poppins-Medium",
+    fontFamily: Platform.OS === 'android' ? "Poppins-Medium" : "Poppins",
     fontSize: 16,
     color: COLORS.textSecondary,
     textAlign: "center",
@@ -174,5 +140,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     paddingHorizontal: SPACING.lg,
+    marginHorizontal: -SPACING.md / 2, // to balance horizontal spacing
+    alignContent: "flex-start", // helps Android wrap like iOS
   },
 });

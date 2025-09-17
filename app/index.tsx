@@ -1,27 +1,29 @@
 import { useEffect, useState } from "react";
-import { View, StyleSheet, InteractionManager } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import AnimatedSplashScreen from "@/components/shared/AnimatedSplashScreen";
 
 export default function Index() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [splashFinished, setSplashFinished] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    const runAfterInteractions = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 2500)); // splash delay
-
-      InteractionManager.runAfterInteractions(() => {
+      console.log('Index: useEffect start');
+    if (splashFinished) {
+        console.log('Index: useEffect start 3');
+      // ⏱ Navigate AFTER splash completes
+      const timeout = setTimeout(() => {
         router.replace("/(onboarding)/screen1");
-      });
-    };
-
-    runAfterInteractions();
-  }, []);
+      }, 200); // small delay to let fade finish
+      return () => clearTimeout(timeout);
+    }
+  }, [splashFinished]);
 
   return (
     <View style={styles.container}>
-      <AnimatedSplashScreen onFinish={() => setIsLoading(false)} />
+      {!splashFinished && (
+        <AnimatedSplashScreen onFinish={() => setSplashFinished(true)} />
+      )}
     </View>
   );
 }

@@ -7,7 +7,8 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal"
-    }, "local": {
+    },
+    "local": {
       "android": {
         "buildType": "apk"
       },
@@ -34,6 +35,10 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "./jamila-key.json"
+      }
+    }
   }
 }
