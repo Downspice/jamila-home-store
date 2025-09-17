@@ -11,3 +11,9 @@ dist
 ./idea
 ./android
 ./android
+expo
+ios
+expo
+idea
+android
+.expo/
