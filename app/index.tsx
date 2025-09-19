@@ -7,6 +7,7 @@ export default function Index() {
   const [splashFinished, setSplashFinished] = useState(false);
   const router = useRouter();
 
+  
   useEffect(() => {
       console.log('Index: useEffect start');
     if (splashFinished) {

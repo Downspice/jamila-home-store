@@ -38,16 +38,16 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
     logoOpacity.value = withTiming(1, { duration: 800 });
 
     // Fade out the splash screen
-    const timeout = setTimeout(() => {
-      containerOpacity.value = withTiming(0, {
-        duration: 800,
-        easing: Easing.out(Easing.cubic),
-      }, () => {
-        runOnJS(onFinish)();
-      });
-    }, 2300);
+      const timeout = setTimeout(() => {
+    containerOpacity.value = withTiming(0, {
+      duration: 800,
+      easing: Easing.out(Easing.cubic),
+    }, () => {
+      onFinish(); 
+    });
+  }, 2300);
 
-    return () => clearTimeout(timeout);
+  return () => clearTimeout(timeout);
   }, []);
 
   const containerAnimatedStyle = useAnimatedStyle(() => ({
