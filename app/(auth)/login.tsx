@@ -15,8 +15,6 @@ import { useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import Input from "@/components/ui/Input";
-import Button from "@/components/ui/Button";
-import GoogleSigninButtonComponent from "@/loginComponenets/googleSignIn";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
