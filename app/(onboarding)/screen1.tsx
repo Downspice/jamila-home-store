@@ -1,14 +1,35 @@
 import { StyleSheet } from "react-native";
 import OnboardingScreen from "@/components/screenDisplays/Onboarding";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Redirect } from "expo-router";
+import { useEffect, useState } from "react";
 
-export default function Screen1() {
+export default async function Screen1() {
+  const [val, setVal]=useState('');
+useEffect(() => {
+  const fetchData = async () => {
+    const data = await AsyncStorage.getItem("hasSeenOnboarding");
+    setVal(data ?? "");
+  };
+
+  fetchData();
+}, []);
+  
+  console.log("val.....", val);
   return (
-    <OnboardingScreen
-      onFinish={async () => {
-        await AsyncStorage.setItem("hasSeenOnboarding", "true");
-      }}
-    />
+    <>
+      {val== "true" ? (
+        <>
+          <Redirect href="/(auth)/login" />
+        </>
+      ) : (
+        <OnboardingScreen
+          onFinish={async () => {
+            await AsyncStorage.setItem("hasSeenOnboarding", "true");
+          }}
+        />
+      )}
+    </>
   );
 }
 

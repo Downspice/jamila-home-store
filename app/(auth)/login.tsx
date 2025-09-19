@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   ImageBackground,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { COLORS, SPACING } from "@/constants/theme";
 import { useAuth } from "@/context/AuthContext";
 import Input from "@/components/ui/Input";
@@ -24,6 +24,12 @@ export default function LoginScreen() {
 
   const { signIn } = useAuth();
   const router = useRouter();
+ const { user } = useAuth();
+  if (user) {
+      return (
+        <Redirect href="/(tabs)" />
+      );
+    }
 
   const handleLogin = async () => {
     if (!email || !password) {

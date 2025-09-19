@@ -1,5 +1,6 @@
 // OnboardingScreen.tsx
 import { COLORS } from "@/constants/theme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Redirect, useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
@@ -61,9 +62,11 @@ export default function OnboardingScreen({
 
   const router = useRouter();
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentIndex < 4 - 1) {
       flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
+      const val= await AsyncStorage.getItem('hasSeenOnboarding') ??"dfdf";
+  console.log("next val async.....",val);
     } else {
       console.log("Navigating to HomeScreen");
       router.replace("/login");

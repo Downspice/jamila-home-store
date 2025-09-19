@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Image,Text, } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -16,7 +16,6 @@ interface AnimatedSplashScreenProps {
 }
 
 export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenProps) {
-  console.log("here>>>>>>>>>")
   const containerOpacity = useSharedValue(1);
   const logoScale = useSharedValue(0);
   const logoOpacity = useSharedValue(0);
@@ -38,16 +37,16 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
     logoOpacity.value = withTiming(1, { duration: 800 });
 
     // Fade out the splash screen
-      const timeout = setTimeout(() => {
-    containerOpacity.value = withTiming(0, {
-      duration: 800,
-      easing: Easing.out(Easing.cubic),
-    }, () => {
-      onFinish(); 
-    });
-  }, 2300);
+    const timeout = setTimeout(() => {
+      containerOpacity.value = withTiming(0, {
+        duration: 800,
+        easing: Easing.out(Easing.cubic),
+      }, () => {
+        runOnJS(onFinish)();
+      });
+    }, 2300);
 
-  return () => clearTimeout(timeout);
+    return () => clearTimeout(timeout);
   }, []);
 
   const containerAnimatedStyle = useAnimatedStyle(() => ({
@@ -60,27 +59,20 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
   }));
 
   return (
-    // <Animated.View style={[styles.container, containerAnimatedStyle]}>
-    //   <LinearGradient
-    //     colors={['#1A120B', '#000000']} // Deep espresso to black
-    //     start={{ x: 0.1, y: 0.1 }}
-    //     end={{ x: 1, y: 1 }}
-    //     style={styles.gradient}
-    //   >
-    //     <View style={styles.content}>
-    //       <Animated.View style={logoAnimatedStyle}>
-    //         <Image
-    //           source={require('@/assets/images/logo.png')}
-    //           style={styles.logo}
-    //           onError={(e) => console.warn("❌ Splash logo failed to load", e.nativeEvent.error)}
-    //         />          </Animated.View>
-    //     </View>
-    //   </LinearGradient>
-    // </Animated.View>
-
-      <View style={[styles.container, { backgroundColor: 'red' }]}>
-    <Text>Testing Splash</Text>
-  </View>
+    <Animated.View style={[styles.container, containerAnimatedStyle]}>
+      <LinearGradient
+        colors={['#1A120B', '#000000']} // Deep espresso to black
+        start={{ x: 0.1, y: 0.1 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradient}
+      >
+        <View style={styles.content}>
+          <Animated.View style={logoAnimatedStyle}>
+            <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
+          </Animated.View>
+        </View>
+      </LinearGradient>
+    </Animated.View>
   );
 }
 
