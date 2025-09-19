@@ -8,36 +8,41 @@
       "developmentClient": true,
       "distribution": "internal"
     },
-    "local": {
+    "preview": {
       "android": {
         "buildType": "apk"
       },
-      "ios": {
-        "simulator": true
+      "local": {
+        "android": {
+          "buildType": "apk"
+        },
+        "ios": {
+          "simulator": true
+        }
+      },
+      "local2": {
+        "android": {
+          "gradleCommand": ":app:assembleRelease"
+        }
+      },
+      "local3": {
+        "developmentClient": true
+      },
+      "local4": {
+        "distribution": "internal"
+      },
+      "production": {
+        "autoIncrement": true,
+        "env": {
+          "ANDROID_SDK_ROOT": "/Users/macbook/Library/Android/sdk"
+        }
       }
     },
-    "local2": {
-      "android": {
-        "gradleCommand": ":app:assembleRelease"
-      }
-    },
-    "local3": {
-      "developmentClient": true
-    },
-    "local4": {
-      "distribution": "internal"
-    },
-    "production": {
-      "autoIncrement": true,
-      "env": {
-        "ANDROID_SDK_ROOT": "/Users/macbook/Library/Android/sdk"
-      }
-    }
-  },
-  "submit": {
-    "production": {
-      "android": {
-        "serviceAccountKeyPath": "./jamila-key.json"
+    "submit": {
+      "production": {
+        "android": {
+          "serviceAccountKeyPath": "./jamila-key.json"
+        }
       }
     }
   }
