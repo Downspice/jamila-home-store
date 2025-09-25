@@ -7,6 +7,8 @@ import {
   Switch,
   TouchableOpacity,
   Alert,
+  Platform,
+  Pressable,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '@/constants/theme';
@@ -68,10 +70,12 @@ export default function PrivacyScreen() {
     onPress?: () => void;
     isDanger?: boolean;
   }) => (
-    <TouchableOpacity
-      style={styles.settingItem}
+    <Pressable
+      style={({ pressed }) => [
+        styles.settingItem,
+        pressed && { opacity: 0.7 },
+      ]}
       onPress={onPress}
-      activeOpacity={onPress ? 0.7 : 1}
     >
       <View style={[styles.iconContainer, isDanger && styles.dangerIcon]}>
         {icon}
@@ -90,7 +94,7 @@ export default function PrivacyScreen() {
           thumbColor={COLORS.white}
         />
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 
   return (
@@ -98,24 +102,6 @@ export default function PrivacyScreen() {
       <Header title="Privacy & Security" showBackButton />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* <GlassmorphicCard style={styles.card}>
-          <Text style={styles.sectionTitle}>Privacy</Text>
-          <SettingItem
-            icon={<Eye size={20} color={COLORS.primary} />}
-            title="Show Profile"
-            description="Allow others to see your profile"
-            value={settings.showProfile}
-            onToggle={() => toggleSetting('showProfile')}
-          />
-          <SettingItem
-            icon={<Shield size={20} color={COLORS.primary} />}
-            title="Show Activity"
-            description="Share your activity publicly"
-            value={settings.showActivity}
-            onToggle={() => toggleSetting('showActivity')}
-          />
-        </GlassmorphicCard> */}
-
         <GlassmorphicCard style={styles.card}>
           <Text style={styles.sectionTitle}>Security</Text>
           {/* <SettingItem
@@ -164,15 +150,17 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: SPACING.lg,
-    paddingBottom: 60,
+    paddingBottom: Platform.OS === 'android' ? 80 : 60,  
   },
   card: {
     padding: SPACING.lg,
     marginBottom: SPACING.lg,
-    borderRadius: 16,
+    borderRadius: 16, 
     shadowColor: COLORS.border,
-    shadowOpacity: 0.05,
+    shadowOpacity: Platform.OS === 'ios' ? 0.1 : 0.05, 
     shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: Platform.OS === 'android' ? 5 : 0,  
   },
   sectionTitle: {
     fontFamily: 'Poppins-SemiBold',
@@ -205,7 +193,7 @@ const styles = StyleSheet.create({
   },
   settingTitle: {
     fontFamily: 'Poppins-Medium',
-    fontSize: 15,
+    fontSize: Platform.OS === 'ios' ? 16 : 15, 
     color: COLORS.textPrimary,
     marginBottom: 2,
   },

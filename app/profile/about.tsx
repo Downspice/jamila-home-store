@@ -112,7 +112,7 @@ const SupportItem = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.screenBackground,
+    backgroundColor: "#f6f5ed" ,
   },
   content: {
     padding: 20,

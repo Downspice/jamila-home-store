@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-start",
     alignItems: "center",
-    backgroundColor: COLORS.screenBackground,
+    backgroundColor: "#f6f5ed" ,
     borderRadius: SPACING.md,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,

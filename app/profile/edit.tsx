@@ -9,6 +9,7 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING } from '@/constants/theme';
@@ -141,45 +142,44 @@ export default function EditProfileScreen() {
   return (
     <View style={styles.container}>
       <Header title="Edit Profile" showBackButton />
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}> 
-          <View style={styles.avatarContainer}>
-            <Image
-              source={{ uri: tempAvatar || avatar || '' }}
-              style={styles.avatar}
-            />
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.avatarContainer}>
+          <Image
+            source={{ uri: tempAvatar || avatar || '' }}
+            style={styles.avatar}
+          />
+          <TouchableOpacity style={styles.editButton} onPress={pickImage}>
+            <Camera size={20} color={COLORS.white} />
+          </TouchableOpacity>
 
-            <TouchableOpacity style={styles.editButton} onPress={pickImage}>
-              <Camera size={20} color={COLORS.white} />
+          {tempAvatar && (
+            <TouchableOpacity style={styles.removeButton} onPress={() => setTempAvatar(null)}>
+              <X size={20} color={COLORS.white} />
             </TouchableOpacity>
+          )}
+        </View>
 
-            {tempAvatar && (
-              <TouchableOpacity style={styles.removeButton} onPress={() => setTempAvatar(null)}>
-                <X size={20} color={COLORS.white} />
-              </TouchableOpacity>
-            )}
-          </View>
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Full Name</Text>
+          <TextInput
+            style={styles.input}
+            value={fullName}
+            onChangeText={setFullName}
+            placeholder="Enter your full name"
+            placeholderTextColor={COLORS.textSecondary}
+          />
+        </View>
 
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Full Name</Text>
-            <TextInput
-              style={styles.input}
-              value={fullName}
-              onChangeText={setFullName}
-              placeholder="Enter your full name"
-              placeholderTextColor={COLORS.textSecondary}
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={[styles.input, styles.disabledInput]}
-              value={user?.email || ''}
-              editable={false}
-              placeholderTextColor={COLORS.textSecondary}
-            />
-            <Text style={styles.helpText}>Email can't be changed. Contact support to update it.</Text>
-          </View> 
+        <View style={styles.formGroup}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={[styles.input, styles.disabledInput]}
+            value={user?.email || ''}
+            editable={false}
+            placeholderTextColor={COLORS.textSecondary}
+          />
+          <Text style={styles.helpText}>Email can't be changed. Contact support to update it.</Text>
+        </View>
 
         <Button
           title="Save Changes"
@@ -195,13 +195,10 @@ export default function EditProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.screenBackground,
+    backgroundColor: "#f6f5ed" ,
   },
   content: {
     flex: 1,
-    padding: SPACING.lg,
-  },
-  card: {
     padding: SPACING.lg,
   },
   avatarContainer: {
@@ -225,7 +222,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderColor: COLORS.white,
     borderWidth: 2,
-    elevation: 3,
+    elevation: Platform.OS === 'android' ? 5 : 3, // Apply elevation for Android
   },
   removeButton: {
     position: 'absolute',
@@ -236,7 +233,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderColor: COLORS.white,
     borderWidth: 2,
-    elevation: 3,
+    elevation: Platform.OS === 'android' ? 5 : 3, // Apply elevation for Android
   },
   formGroup: {
     marginBottom: SPACING.lg,
@@ -274,7 +271,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.screenBackground,
+    backgroundColor: "#f6f5ed" ,
   },
   loadingText: {
     marginTop: 10,

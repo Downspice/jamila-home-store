@@ -13,6 +13,7 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   ImageBackground,
+  Platform,
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
@@ -122,15 +123,15 @@ export default function OnboardingScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.screenBackground,
+    backgroundColor: "#f6f5ed" ,
   },
   pageContainer: {
     width: width,
     height: height,
-    justifyContent: "flex-end",
-    alignItems: "center",
+    justifyContent: 'flex-end',
+    alignItems: 'center',
     padding: 20,
-    bottom: 170,
+    bottom: Platform.OS === 'android' ? 100 : 170,
   },
   title: {
     fontSize: 28,

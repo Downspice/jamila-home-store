@@ -156,7 +156,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.screenBackground,
+    backgroundColor: "#f6f5ed" ,
   },
   avatarContainer: {
     alignSelf: "center",

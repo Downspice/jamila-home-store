@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Modal } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Modal, Platform } from 'react-native';
 import { COLORS, SPACING } from '@/constants/theme';
 import { Bookmark, Plus, X, Check } from 'lucide-react-native';
 import Button from '@/components/ui/Button';
@@ -61,18 +61,18 @@ export default function SaveToCatalogSheet({
                 returnKeyType="done"
               />
               <View style={styles.buttonRow}>
-                <Button
+                <Button size="small" variant="primary" 
+                  title="Create"
+                  onPress={handleCreateNewCatalog}
+                  style={styles.button}
+                />
+                <Button size="small"
                   title="Cancel"
                   onPress={() => {
                     setNewCatalogName('');
                     setShowNewCatalogInput(false);
                   }}
                   variant="outline"
-                  style={styles.button}
-                />
-                <Button
-                  title="Create"
-                  onPress={handleCreateNewCatalog}
                   style={styles.button}
                 />
               </View>
@@ -122,6 +122,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingBottom: Platform.OS === 'android' ? 70 : 0, // slight shift up on Android if needed
   },
   modalContent: {
     backgroundColor: COLORS.background,
@@ -129,6 +130,17 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     width: '90%',
     maxWidth: 400,
+    ...Platform.select({
+      android: {
+        elevation: 5, // Android shadow
+      },
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+    }),
   },
   header: {
     flexDirection: 'row',
@@ -138,7 +150,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: 'Playfair-Bold',
-    fontSize: 24,
+    fontSize: 22.5,
     color: COLORS.textPrimary,
   },
   newCatalogButton: {
@@ -146,14 +158,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: SPACING.md,
     backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 11.5,
     borderWidth: 1,
     borderColor: COLORS.black10,
     marginTop: SPACING.sm,
   },
   newCatalogText: {
     fontFamily: 'Poppins-Medium',
-    fontSize: 14,
+    fontSize: 12.5,
     color: COLORS.primary,
     marginLeft: SPACING.xs,
   },
@@ -162,7 +174,9 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: SPACING.md,
+    justifyContent: 'space-between', 
+    alignItems: 'center',            
+    gap: SPACING.md,                  
   },
   button: {
     flex: 1,
@@ -205,4 +219,4 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.success,
   },
-}); 
+});

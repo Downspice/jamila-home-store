@@ -87,7 +87,7 @@ export const COLORS = {
   textLight: '#999999',
   
   // ui colors
-  background: '#F8F9FA',
+  background: "#f6f5ed",
   card: '#FFFFFF',
   success: '#4CAF50',
   info: '#2196F3',
@@ -98,7 +98,7 @@ export const COLORS = {
   inactive: '#A0A0A0',
 
   //background
-  screenBackground: '#f6f5ed',
+  screenBackground: "#f6f5ed" ,
 
   //border
   border: 'rgba(0, 0, 0, 0.1)',

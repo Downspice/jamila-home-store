@@ -8,6 +8,7 @@ import {
   TextStyle,
   ActivityIndicator,
   View,
+  Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS, FONTS, SPACING } from "@/constants/theme";
@@ -52,6 +53,7 @@ export default function Button({
     // Variant styles (for outline and ghost variants)
     if (variant === "outline") buttonStyles.push(styles.outlineButton);
     if (variant === "ghost") buttonStyles.push(styles.ghostButton);
+    if (variant === "primary") buttonStyles.push(styles.primaryButton);
 
     // Disabled style
     if (disabled) buttonStyles.push(styles.disabledButton);
@@ -104,30 +106,29 @@ export default function Button({
   );
 
   // For gradient buttons (primary and secondary variants)
-  if (variant === "primary" || variant === "secondary") {
-    const gradientColors =
-      variant === "primary" ? COLORS.primary : COLORS.secondary;
+  // if (variant === "primary" || variant === "secondary") {
+  //   // const gradientColors =
+  //   //   variant === "primary" ? COLORS.primary : COLORS.secondary;
 
-    return (
-      <TouchableOpacity
-        onPress={disabled || loading ? undefined : onPress}
-        activeOpacity={0.8}
-        style={fullWidth ? styles.fullWidth : {}}
-        disabled={disabled || loading}
-      >
-        {/* <LinearGradient
-          colors={gradientColors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={getButtonStyles()}
-        >
-          {renderContent()}
-        </LinearGradient> */}
+  //   return (
+  //     <TouchableOpacity
+  //       onPress={disabled || loading ? undefined : onPress}
+  //       activeOpacity={0.8} 
+  //       disabled={disabled || loading}
+  //     >
+  //       {/* <LinearGradient
+  //         colors={gradientColors}
+  //         start={{ x: 0, y: 0 }}
+  //         end={{ x: 1, y: 0 }}
+  //         style={getButtonStyles()}
+  //       >
+  //         {renderContent()}
+  //       </LinearGradient> */}
 
-        <View style={getButtonStyles()}>{renderContent()}</View>
-      </TouchableOpacity>
-    );
-  }
+  //       <View style={getButtonStyles()}>{renderContent()}</View>
+  //     </TouchableOpacity>
+  //   );
+  // }
 
   // For non-gradient buttons (outline and ghost variants)
   return (
@@ -143,69 +144,76 @@ export default function Button({
 }
 
 const styles = StyleSheet.create({
-   
-    button: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      borderRadius: 12,
-      paddingVertical: SPACING.md,
-      paddingHorizontal: SPACING.xl,
-      gap: SPACING.sm,
-    
-      // Shadow for iOS
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
-    
-      // Shadow for Android
-      elevation: 5,
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 12,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    gap: SPACING.sm,
   },
+
   fullWidth: {
     width: "100%",
   },
+
   smallButton: {
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.md,
     borderRadius: 8,
   },
+
   largeButton: {
     paddingVertical: SPACING.lg,
     paddingHorizontal: SPACING.xxl,
     borderRadius: 16,
   },
+
   outlineButton: {
     backgroundColor: "transparent",
     borderWidth: 1,
     borderColor: COLORS.primary,
   },
+
+  primaryButton: {
+    backgroundColor:  COLORS.primary,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+  },
+
   ghostButton: {
     backgroundColor: "transparent",
     borderWidth: 0,
     paddingHorizontal: SPACING.sm,
   },
+
   disabledButton: {
     opacity: 0.6,
   },
+
   text: {
     color: COLORS.black,
     fontFamily: "Poppins-Medium",
     fontSize: 16,
     textAlign: "center",
   },
+
   smallText: {
     fontSize: 14,
   },
   largeText: {
     fontSize: 18,
   },
+
   outlineText: {
     color: COLORS.primary,
   },
+
   ghostText: {
     color: COLORS.primary,
   },
+
   disabledText: {
     opacity: 0.8,
   },
